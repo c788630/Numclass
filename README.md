@@ -9,8 +9,8 @@ This is a highly extensible and modular Python script that classifies integer nu
 - **Polygonal and Figurate:** triangular, pentagonal, pronic, cyclic, repunit, etc.
 - **Primes & Prime-related:** twin, safe, sexy, Sophie Germain, palindromic, emirp, factorial, strong, super, etc.
 - **Pseudoprimes and Cryptographic numbers:** Carmichael, Fermat and Euler-Jacobi pseudoprimes, etc.
-- **Mathematical Curiosities:** Cake numbers, Munchausen numbers, Kaprekar constants, strobogrammatic, vampire, Eban, etc.
-- **Famous and fun numbers:** in pop culture, internet, or sci-fi  
+- **Mathematical Curiosities:** Cake, Munchausen, Kaprekar constants, strobogrammatic, vampire, Eban, etc.
+- **Famous and fun numbers:** in pop culture, internet, computing, or sci-fi  
 
 The classification is fast and accurate thanks to algorithmic optimizations and optional use of OEIS `bXXXXXX.txt` files.  
 Inspired by [Numberphile](https://www.youtube.com/user/numberphile) and their love of surprising number facts!
