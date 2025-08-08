@@ -36,7 +36,7 @@ Options:
 - Detailed explanations for each classification
 - Auto-discovers custom classifiers: simply add your own!
 
-Want to write your own property?  
+Want to write your own classification?  
 1. Write a function: `def is_foobar_number(n): ...` in any `.py` file in `\classifiers`  
 2. Add a `@classifier` decorator at the top of your function:
 ```
