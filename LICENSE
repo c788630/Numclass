@@ -1,0 +1,49 @@
+Number Classifier
+
+Copyright (c) 2024 Marcel M W van Dinteren
+
+This project contains two distinct components: code and data files.
+
+------------------------------------------------------------------------------
+CODE LICENSE (Script: numclass.py)
+------------------------------------------------------------------------------
+This code is licensed under the Creative Commons Attribution-NonCommercial 4.0
+International License (CC BY-NC 4.0).
+
+You are free to:
+  - Share — copy and redistribute the material in any medium or format
+  - Adapt — remix, transform, and build upon the material
+
+Under the following terms:
+  - Attribution — You must give appropriate credit, provide a link to the license,
+    and indicate if changes were made. You may do so in any reasonable manner,
+    but not in any way that suggests the licensor endorses you or your use.
+  - NonCommercial — You may not use the material for commercial purposes.
+
+See the full license text at:
+https://creativecommons.org/licenses/by-nc/4.0/
+
+------------------------------------------------------------------------------
+DATA LICENSE (OEIS b-files)
+------------------------------------------------------------------------------
+Data files:
+  - b004394.txt (OEIS A004394)
+  - b104272.txt (OEIS A104272)
+
+These files are derived from the OEIS and are licensed under the
+Creative Commons Attribution-NonCommercial 3.0 License (CC BY-NC 3.0).
+
+For details, see: https://oeis.org/wiki/License_Agreement
+
+If you distribute these files, you must attribute the OEIS Foundation
+and not use the data for commercial purposes.
+
+------------------------------------------------------------------------------
+Attribution
+------------------------------------------------------------------------------
+Author: Marcel M W van Dinteren <m.vandinteren1@chello.nl>
+Date:   2024-07-20
+
+OEIS b-files: The On-Line Encyclopedia of Integer Sequences, oeis.org
+
+------------------------------------------------------------------------------
