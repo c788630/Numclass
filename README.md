@@ -52,29 +52,35 @@ Want to write your own classification?
 ## 📁 File Structure
 
 ```text
-numclass.py                             # Main classification engine
-utility.py                              # Utility functions for numclass.py
-decorators.py                           # Decorator functions for numclass.py
-output_manager.py                       # Output manager (screen and file)
-test_numclass.py                        # Unit test set for all classifiers (pytest -v)
-README.md                               # Documentation
-LICENSE                                 # Licensing information
-requirements.txt                        # requirements installer
-classifiers/arithmetic_divisor.py       # Arithmetic and Divisor-based functions
-classifiers/curiosities.py              # Mathematical curiosities
-classifiers/digit_based.py              # Digit based test functions
-classifiers/fun_number.py               # Fun numbers from pop culture, etc.
-classifiers/polygonal_figurate.py       # Polygonal and Figurate Numbers
-classifiers/prime.py                    # Prime and Prime-related functions
-classifiers/pseudoprime_crypto.py       # Pseudoprime and cryptographic numbers
-classifiers/sequences.py                # Integer sequences
-data/b002093.txt                        # OEIS file for Highly abundant numbers
-data/b004394.txt                        # OEIS file for Superabundant numbers
-data/b005114.txt                        # OEIS file for Untouchable numbers
-data/b104272.txt                        # OEIS file for Ramanujan primes
-user/fun_numbers.py                     # Numberlist for fun_number.py
-user/intersections.py                   # Intersection definitions
-user/settings.py                        # Numclass settings
+numclass/
+├─ README.md
+├─ LICENSE
+├─ requirements.txt
+├─ __init__.py
+├─ numclass.py              # CLI entrypoint logic (top-level)
+├─ utility.py
+├─ decorators.py
+├─ output_manager.py
+├─ data/                    # OEIS data
+│  ├─ b002093.txt
+│  ├─ b004394.txt
+│  ├─ b005114.txt
+│  └─ b104272.txt
+├─ classifiers/             # first-party classifiers (package)
+│  ├─ __init__.py
+│  ├─ arithmetic_divisor.py
+│  ├─ curiosities.py
+│  ├─ digit_based.py
+│  ├─ fun_number.py
+│  ├─ polygonal_figurate.py
+│  ├─ prime.py
+│  ├─ pseudoprime_crypto.py
+│  └─ sequences.py
+└─ user/                    # mutable user space
+   ├─ __init__.py
+   ├─ fun_numbers.py
+   ├─ intersections.py
+   └─ settings.py
 ```
 
 ## 🛠 Dependencies
