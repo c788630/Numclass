@@ -201,10 +201,10 @@ def is_happy_number(n: int) -> Tuple[bool, str]:
 )
 def is_harshad_number(n: int) -> Tuple[bool, str]:
     if n < 1:
-        return False
+        return False, None
     digit_sum = sum(int(d) for d in str(abs(n)))
     if digit_sum == 0:
-        return False
+        return False, None
     if n % digit_sum == 0:
         details = f"{n} is divisible by the sum of its digits: {n} ÷ {digit_sum} = {n // digit_sum}"
         return True, details

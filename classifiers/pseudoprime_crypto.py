@@ -4,7 +4,7 @@
 
 from decorators import classifier, limited_to
 from math import gcd
-from sympy import isprime, factorint, gcd, jacobi_symbol
+from sympy import isprime, factorint, jacobi_symbol
 from typing import Tuple
 
 CATEGORY = "Pseudoprimes and Cryptographic Numbers"
@@ -19,30 +19,46 @@ CATEGORY = "Pseudoprimes and Cryptographic Numbers"
 @limited_to(9999999)
 def is_carmichael_number(n: int) -> Tuple[bool, str]:
     """
-    Returns (True, details) for whether n is a Carmichael number.
-    Details explain Korselt's criterion for each prime factor, formatted for use with format_details().
+    Returns (True, details) if n is a Carmichael number, else (False, None).
+
+    Korselt's criterion (1899):
+      • n is composite
+      • n is square-free
+      • For every prime p | n, (p - 1) | (n - 1)
     """
-    if n < 2 or isprime(n):
+    # Must be composite and ≥ 3; all Carmichael numbers are odd
+    if n < 3 or isprime(n) or (n % 2 == 0):
         return False, None
-    factors = factorint(n)
+
+    factors = factorint(n)  # {prime: exponent}
+
+    # Square-free check
+    if any(exp != 1 for exp in factors.values()):
+        return False, None
+
+    # (Optional speed tweak) Classic theorem: Carmichael numbers have ≥ 3 prime factors
     if len(factors) < 3:
         return False, None
-    pf_list = [f"{p}" if exp == 1 else f"{p}^{exp}" for p, exp in factors.items()]
+
+    # Build details; use your bullet style and per-prime divisibility checks
     bullet = "•"
-    lines = [f"Prime factors: {' * '.join(pf_list)}"]
-    passed = True
-    for p in factors:
-        cond = (n - 1) % (p - 1) == 0
-        check_str = f"{bullet} (n-1) % (p-1) = ({n}-1) % ({p}-1) = {(n-1) % (p-1)} {'✓' if cond else '✗'}"
-        lines.append(check_str)
+    pf_list = " * ".join(str(p) for p in sorted(factors))
+    lines = [f"Prime factors: {pf_list}"]
+
+    ok = True
+    for p in sorted(factors):
+        r = (n - 1) % (p - 1)
+        cond = (r == 0)
+        lines.append(f"{bullet} (n-1) % (p-1) = ({n}-1) % ({p}-1) = {r} {'✓' if cond else '✗'}")
         if not cond:
-            passed = False
+            ok = False
             break
-    if not passed:
+
+    if not ok:
         return False, None
-    lines.append("All conditions satisfied: n is a Carmichael number.")
-    detail = "\n".join(lines)
-    return True, detail
+
+    lines.append("All conditions satisfied (composite, square-free, and (p−1)|(n−1) for all p).")
+    return True, "\n".join(lines)
 
 
 BASES = (2, 3, 5, 7, 11, 13)

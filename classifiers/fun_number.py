@@ -11,7 +11,8 @@ CATEGORY = "Fun numbers"
 
 @classifier(
     label="Fun number",
-    description="Numbers that are famous or iconic in pop culture, computing, sci-fi, internet humor, or memes.",
+    description=("Numbers that are famous or iconic in pop culture, "
+                 "computing, sci-fi, internet humor, or memes."),
     oeis=None,
     category=CATEGORY
 )

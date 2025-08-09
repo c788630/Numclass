@@ -72,7 +72,7 @@ def is_achilles_number(n: int) -> Tuple[bool, str]:
 
 @classifier(
     label="Amicable number",
-    description="Poper divisors sum to m, whose divisors sum to n.",
+    description="Proper divisors sum to m, whose divisors sum to n.",
     oeis="A063990",
     category=CATEGORY
 )

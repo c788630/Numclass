@@ -2,18 +2,20 @@
 #  Utility functions
 # -----------------------------------------------------------------------------
 
+import importlib
+import inspect
 import os
+import pkgutil
 import re
 import shutil
-import time
-import threading
+import sys
 import textwrap
-import importlib.util
-import inspect
+import time
+import traceback
 
 from colorama import Fore, Style
 from functools import lru_cache
-from sympy import divisors, factorint, divisor_sigma, isprime
+from sympy import divisors, factorint, divisor_sigma, isprime, lcm
 from user import settings
 
 
@@ -50,6 +52,30 @@ def base_name(a: int) -> str:
     return f"{NAMES.get(a, f'base {a}')}" + f" (base {a})"
 
 
+def carmichael_with_details(n: int, factors: dict[int, int]):
+    """
+    Return Carmichael's λ(n) and a compact explanation string.
+
+    Example: λ(2^2)=2, λ(3)=2, λ(5)=4 => lcm(2,2,4)=4
+    """
+    parts = []
+    lam = 1
+    for p, a in sorted(factors.items()):
+        if p == 2:
+            if a == 1:
+                lam_pa = 1
+            elif a == 2:
+                lam_pa = 2
+            else:
+                lam_pa = 1 << (a - 2)
+        else:
+            lam_pa = (p - 1) * (p ** (a - 1))
+        parts.append(f"λ({p}^{a})={lam_pa}" if a > 1 else f"λ({p})={lam_pa}")
+        lam = lcm(lam, lam_pa)
+
+    return lam, f"{', '.join(parts)} ⇒ lcm({', '.join(str(p.split('=')[1]) for p in parts)})={lam}"
+
+
 def clear_screen():
     """
     Clear the terminal screen on Windows and Unix-based systems.
@@ -65,7 +91,6 @@ def compute_aliquot_sequence(n, max_steps=200, step_timeout=0.3, om=None):
     Compute the aliquot sequence starting from n, with per-step timeouts and abort support.
     Uses sympy.divisor_sigma for speed. Only outputs per-step progress, not per divisor.
     """
-    import time
 
     def clear_line():
         width = get_terminal_width()
@@ -146,7 +171,8 @@ def digit_product(n: int) -> int:
 
 def digital_root_sequence(n: int):
     """
-    To be done
+    Yield the digital root sequence for n, repeatedly summing its decimal
+    digits until a single-digit is reached, including the starting value.
     """
     seq = [abs(n)]
     while seq[-1] >= 10:
@@ -181,14 +207,6 @@ def filter_maximal_intersections(classes, intersection_label_to_atomic):
                 keep.discard(atom)
     # Rebuild the class list, preserving original order
     return [item for item in classes if item['label'] in keep]
-
-
-def strip_ansi(s):
-    """
-    Strip ansi sequences from text, used when printing to a file.
-    """
-    ansi_escape = re.compile(r'\x1b\[[0-9;]*m')
-    return ansi_escape.sub('', s)
 
 
 def format_aliquot_sequence(
@@ -269,31 +287,45 @@ def format_aliquot_sequence(
     return aliquot_wrapped, status_lines, steps
 
 
-def format_prime_factors(n: int) -> str:
+def format_prime_factors(n: int, *,
+                         factors: dict[int, int] | None = None,
+                         return_factors: bool = False):
     """
     Format the prime factorization of n as a string.
+    If `factors` is provided, it is used (no refactor). If `return_factors`
+    is True, also return the factor dict that was used.
+
+    Examples:
+    >>> format_prime_factors(60)
+    '2^2 * 3 * 5'
+    >>> s, facs = format_prime_factors(60, return_factors=True)
+    >>> s, facs
+    ('2^2 * 3 * 5', {2: 2, 3: 1, 5: 1})
     """
     if n == 0:
-        return "0"
+        return ("0", {}) if return_factors else "0"
     if abs(n) == 1:
-        return str(n)
-    facs = factorint(abs(n))
+        return (str(n), {}) if return_factors else str(n)
+
+    if factors is None:
+        factors = factorint(abs(n))
+
     parts = []
-    for p in sorted(facs):
-        exp = facs[p]
-        if exp == 1:
-            parts.append(str(p))
-        else:
-            parts.append(f"{p}^{exp}")
+    for p in sorted(factors):
+        exp = factors[p]
+        parts.append(f"{p}^{exp}" if exp > 1 else f"{p}")
+
     result = " * ".join(parts)
     if n < 0:
         result = f"-1 * {result}"
-    return result
+
+    return (result, factors) if return_factors else result
 
 
 def get_terminal_width(default=80):
     """
-    To be done
+    Return the terminal's character width if detected, else the default
+    value (80 by default).
     """
     try:
         return shutil.get_terminal_size().columns
@@ -325,32 +357,38 @@ def get_ordinal_suffix(n):
 def import_classifier_functions(package_folder):
     """
     Import all classifier functions from .py files in a package folder.
-    Returns a dict mapping function names to function objects.
+    `package_folder` is a filesystem path to a directory containing __init__.py.
     """
     classifier_functions = {}
     folder = os.path.abspath(package_folder)
-    package = os.path.basename(folder)
+    package = os.path.basename(folder)  # 'classifiers' (not './classifiers')
     parent = os.path.dirname(folder)
 
-    # Add parent directory to sys.path so imports work
-    import sys
+    # Ensure parent on sys.path so we can import 'classifiers'
     if parent not in sys.path:
         sys.path.insert(0, parent)
 
+    try:
+        importlib.import_module(package)
+    except Exception as e:
+        print(f"Failed to import package '{package_folder}': {e}")
+        traceback.print_exc()
+        sys.exit(1)
+
     for filename in os.listdir(folder):
-        if not filename.endswith('.py') or filename.startswith('_'):
+        if not filename.endswith(".py") or filename.startswith("_"):
             continue
         modname = filename[:-3]
-        module_name = f"{package}.{modname}"
+        module_name = f"{package}.{modname}"  # e.g., classifiers.primes
         try:
             module = importlib.import_module(module_name)
         except Exception as e:
-            print(f"Failed to import {modname}: {e}")
-            exit(1)
-            #continue
+            print(f"Failed to import {module_name}: {e}")
+            traceback.print_exc()
+            sys.exit(1)
 
         for name, obj in inspect.getmembers(module):
-            if (inspect.isfunction(obj) or inspect.isbuiltin(obj)) and hasattr(obj, 'label'):
+            if (inspect.isfunction(obj) or inspect.isbuiltin(obj)) and hasattr(obj, "label"):
                 classifier_functions[name] = obj
 
     return classifier_functions
@@ -425,24 +463,19 @@ def omega_stats(n: int):
 
 def parity(n: int):
     """
-    Returns the parity (even/Odd of a number
+    Returns the parity (even/odd of a number)
     """
     if n % 2 == 0:
         return "Even"
     return "Odd"
 
 
-FORBIDDEN_FILENAMES = {
-    ".gitignore",
-    "b002093.txt",
-    "b004394.txt",
-    "b005114.txt",
-    "b104272.txt",
-    "LICENSE",
-    "requirements.txt"
-}
-
-FORBIDDEN_EXTENSIONS = {".py", ".md"}
+def strip_ansi(s):
+    """
+    Strip ansi sequences from text, used when printing to a file.
+    """
+    ansi_escape = re.compile(r'\x1b\[[0-9;]*m')
+    return ansi_escape.sub('', s)
 
 
 def suppress_atomic_components(classes, intersection_label_to_atomic):
@@ -461,3 +494,73 @@ def suppress_atomic_components(classes, intersection_label_to_atomic):
         if (item['label'] not in atomic_to_remove)
         or (item['label'] in intersection_label_to_atomic)
     ]
+
+
+def totient_with_details(n: int, factors: dict[int, int]):
+    """
+    Return φ(n) and a compact explanation string.
+    Example: φ(2^2)=2, φ(3)=2, φ(5)=4 ⇒ 2*2*4=16
+    """
+    if n == 1:
+        return 1, "φ(1)=1"
+
+    parts = []
+    phi = 1
+    mults = []  # for the "2*2*4" bit
+
+    for p, a in sorted(factors.items()):
+        # φ(p^a) = p^(a-1) * (p-1)
+        phi_pa = (p - 1) * (p ** (a - 1))
+        parts.append(f"φ({p}^{a})={phi_pa}" if a > 1 else f"φ({p})={phi_pa}")
+        mults.append(str(phi_pa))
+        phi *= phi_pa
+
+    return phi, f"{', '.join(parts)} ⇒ {'*'.join(mults)}={phi}"
+
+
+def validate_output_setting(output_file: str | None) -> str | None:
+    """
+    Validate output setting.
+    - None / "" => ok (screen only)
+    - "." / "./" / trailing "/" => ok (per-number directory mode)
+    - path/to/file => must not be in forbidden base names or extensions
+    Returns the (possibly normalized) output_file, or raises ValueError.
+    """
+    FORBIDDEN_FILENAMES = {
+        ".gitignore",
+        "b002093.txt",
+        "b004394.txt",
+        "b005114.txt",
+        "b104272.txt",
+        "LICENSE",
+        "requirements.txt",
+        # Windows reserved device names (case-insensitive on Windows)
+        "con", "prn", "aux", "nul",
+        "com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8", "com9",
+        "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9",
+    }
+
+    FORBIDDEN_EXTENSIONS = {".py", ".md"}
+
+    if not output_file:
+        return output_file  # screen only
+
+    # directory/per-number modes are allowed as-is
+    if output_file in (".", "./") or output_file.endswith("/"):
+        return output_file
+
+    # single file mode: check basename & extension
+    basename = os.path.basename(output_file)
+    name_no_ext, ext = os.path.splitext(basename)
+    ext = ext.lower()
+
+    # On Windows, device names are forbidden regardless of extension
+    base_lower = basename.lower()
+    name_lower = name_no_ext.lower()
+    if base_lower in FORBIDDEN_FILENAMES or name_lower in FORBIDDEN_FILENAMES:
+        raise ValueError(f"Forbidden output filename: {basename}")
+
+    if ext in FORBIDDEN_EXTENSIONS:
+        raise ValueError(f"Forbidden output file extension: {ext}")
+
+    return output_file

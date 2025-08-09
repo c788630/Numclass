@@ -136,7 +136,7 @@ TEST_CASES = [
     (197,   ["Keith prime"]),
     (13,    ["Left-truncatable prime"]),
     (8191,  ["Mersenne prime"]),
-    (433,   ["Pierpont prime"]),
+    (97,    ["Pierpont prime"]),
     (30029, ["Primorial prime"]),
     (41,    ["Proth prime"]),
     (127,   ["Ramanujan prime"]),

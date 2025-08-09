@@ -7,6 +7,7 @@ from functools import wraps
 
 TEST_LIMITS = {}
 
+
 def classifier(label=None, description=None, oeis=None, category=None):
     """
     Decorator for number classifier functions.

@@ -3,7 +3,7 @@ Number Classifier - Mathematical Classifications and Curiosities
 
 Author:      Marcel M W van Dinteren <m.vandinteren1@chello.nl>
 Date:        2025-08-05
-Version:     1.0.0
+Version:     1.0.1
 
 Description:
     Classifies an integer n according to various mathematical properties
@@ -36,15 +36,14 @@ License:
 
 """
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 import importlib.util
 import sys
 import time
 
 try:
-    from sympy import (isprime, divisors, totient)
-    from sympy.functions.combinatorial.numbers import reduced_totient
+    from sympy import (isprime, divisors, factorint)
 except ImportError:
     print("Please install sympy: pip install sympy")
     exit(1)
@@ -68,12 +67,23 @@ from colorama import init, Fore, Style
 from decorators import TEST_LIMITS
 from output_manager import OutputManager
 from utility import (clear_screen, digital_root_sequence, natural_sort_key,
-                     omega_stats, parity, digit_sum, digit_product,
+                     parity, digit_sum, digit_product,
                      get_terminal_width, get_terminal_height,
                      intersection_details_from_atomic, strip_ansi,
                      suppress_atomic_components, filter_maximal_intersections,
                      format_prime_factors, compute_aliquot_sequence,
-                     format_aliquot_sequence, import_classifier_functions)
+                     format_aliquot_sequence, import_classifier_functions,
+                     carmichael_with_details, totient_with_details,
+                     validate_output_setting)
+
+init(autoreset=True)
+
+# Validate OUTPUT_FILE from settings.py immediately after import
+try:
+    settings.OUTPUT_FILE = validate_output_setting(getattr(settings, "OUTPUT_FILE", None))
+except ValueError as e:
+    print(f"Fatal error in OUTPUT_FILE setting: {e}", file=sys.stderr)
+    sys.exit(1)
 
 # Load classifier functions
 TEST_FUNCTIONS_ALL = import_classifier_functions("./classifiers")
@@ -301,7 +311,7 @@ def classify_number(
         if not fn:
             continue
 
-        lim = TEST_LIMITS.get(fn.__name__) if 'TEST_LIMITS' in globals() else None
+        lim = TEST_LIMITS.get(fn.__name__)
         if not allow_slow_calculations and lim is not None and n > lim:
             if om and debug:
                 om.write(f"Skipping {label}: n > {lim}")
@@ -388,7 +398,17 @@ def print_statistics(n: int, show_details: bool = True, om=None):
     Pretty print all statistics for n.
     output_manager: if None, prints to screen.
     """
-    ALIGN_WIDTH = 22
+    ALIGN_WIDTH = 22  # label column
+
+    # helpers for safe alignment/formatting
+    def _to_str_int(x) -> str:
+        try:
+            return str(int(x))  # handles SymPy Integer
+        except Exception:
+            return str(x)
+
+    def _pad_right(s: str, w: int) -> str:
+        return s.ljust(w)
 
     # -- Number statistics
     om.write(f"Number: {Fore.YELLOW + Style.BRIGHT}{n}{Style.RESET_ALL}")
@@ -400,45 +420,89 @@ def print_statistics(n: int, show_details: bool = True, om=None):
     om.write(f"  {'Number of digits:':<{ALIGN_WIDTH}}{len(str(abs(n)))}")
     om.write(f"  {'Sum of digits:':<{ALIGN_WIDTH}}{digit_sum(n)}")
     om.write(f"  {'Product of digits:':<{ALIGN_WIDTH}}{digit_product(n)}")
+
     dr_seq = digital_root_sequence(n)
     dr_seq_str = " → ".join(str(x) for x in dr_seq)
     om.write(f"  {'Digital root of |n|:':<{ALIGN_WIDTH}}{dr_seq[-1]} (sequence: {dr_seq_str})")
-    if n != 0 and not isprime(n):
-        om.write(f"  {'Prime factorization:':<{ALIGN_WIDTH}}{format_prime_factors(n)}")
-    if n > 1:
-        big_omega, little_omega = omega_stats(n)
-        label = "Prime factor counts:"
-        om.write(f"  {label:<{ALIGN_WIDTH}}Ω(n) = {big_omega}, ω(n) = {little_omega}")
-    if n > 0:
-        label = "Euler's totient φ(n):"
-        om.write(f"  {label:<{ALIGN_WIDTH}}{totient(n)}")
-        label = "Carmichael λ(n):"
-        om.write(f"  {label:<{ALIGN_WIDTH}}{reduced_totient(n)}")
 
-    # -- Divisor statistics
+    abs_n = abs(n)
+
+    # Factor once; skip 0/±1
+    factors = {} if abs_n <= 1 else factorint(abs_n)
+    n_is_prime = abs_n > 1 and isprime(abs_n)
+
+    # Prime factorization (show for composites only; skip 0/±1)
+    if n != 0 and abs_n > 1 and not n_is_prime:
+        # Reuse existing factorization to format
+        pf_str = format_prime_factors(n, factors=factors, return_factors=False)
+        om.write(f"  {'Prime factorization:':<{ALIGN_WIDTH}}{pf_str}")
+
+    # Ω(n), ω(n) for |n| > 1
+    if abs_n > 1:
+        big_omega = sum(factors.values())
+        little_omega = len(factors)
+        om.write(f"  {'Prime factor counts:':<{ALIGN_WIDTH}}Ω(n) = {big_omega}, ω(n) = {little_omega}")
+
+    # φ(n) and λ(n) for n > 0 (φ(0) undefined)
+    if n > 0:
+        # compute once (reusing factors)
+        if n == 1:
+            phi, phi_details = 1, "φ(1)=1"
+            lam, lam_details = 1, "λ(1)=1"
+        else:
+            phi, phi_details = totient_with_details(n, factors)
+            lam, lam_details = carmichael_with_details(n, factors)
+
+        # dynamic value column so '(' aligns on both lines
+        phi_s = _to_str_int(phi)
+        lam_s = _to_str_int(lam)
+        VAL_WIDTH = max(len(phi_s), len(lam_s)) + 1  # +1 space
+
+        def _emit(label, val_s, details):
+            left = f"  {label:<{ALIGN_WIDTH}}{val_s.ljust(VAL_WIDTH)}"
+            if not details or not show_details:
+                om.write(left.rstrip())
+                return
+            wrapped = format_details(details, start_col=len(left))
+            first, *rest = wrapped.splitlines()
+            om.write(left + first)
+            for line in rest:
+                om.write(line)
+
+        _emit("Euler's totient φ(n):", phi_s, f"({phi_details})")
+        _emit("Carmichael λ(n):",      lam_s, f"({lam_details})")
+
+    # -- Divisor statistics (of |n|)
     if n != 0:
         om.write(f"\n{Fore.CYAN + Style.BRIGHT}Divisor statistics of |n|:{Style.RESET_ALL}")
-        divs = sorted(divisors(n))
+        divs = sorted(divisors(abs_n))  # use |n|
         num_divs = len(divs)
         sum_divs = sum(divs)
-        aliquot = sum_divs - n
+        aliquot = sum_divs - abs_n
+
         max_divs = getattr(settings, "DIVISORLIST_LIMIT", 100)
         aliquot_seq = getattr(settings, "ALIQUOT_SEQUENCE", True)
         show_div = getattr(settings, "SHOW_DIVISORS", True)
+
         s = ", ".join(str(d) for d in divs)
         s_wrapped = format_details(s, start_col=24)
+
         om.write(f"  {'Number of divisors:':<22}{num_divs}")
         if show_div and ((max_divs is None) or (num_divs <= max_divs)):
             om.write(f"  {'Divisors:':<22}{s_wrapped.strip()}")
         om.write(f"  {'Sum of divisors:':<22}{sum_divs}")
+
         if n > 0 and aliquot_seq:
             om.write(f"  {'Aliquot sum:':<22}{aliquot}")
 
             MAX_ALIQUOT_STEPS = getattr(settings, "MAX_ALIQUOT_STEPS", 50)
-            seq, highlight_idx, aborted, skipped = compute_aliquot_sequence(n, max_steps=MAX_ALIQUOT_STEPS, om=om)
+            seq, highlight_idx, aborted, skipped = compute_aliquot_sequence(
+                n, max_steps=MAX_ALIQUOT_STEPS, om=om
+            )
 
             aliquot_wrapped, status_lines, seq_len = format_aliquot_sequence(
-                seq, highlight_idx, aborted, skipped, max_steps=MAX_ALIQUOT_STEPS)
+                seq, highlight_idx, aborted, skipped, max_steps=MAX_ALIQUOT_STEPS
+            )
 
             if aliquot_wrapped:
                 om.write("  Aliquot sequence:     " + aliquot_wrapped)
@@ -510,10 +574,10 @@ def show_classifier_list(om=None):
     # Build help text lines
     def build_help_lines():
         cat_to_labels, total = get_cat_to_labels_and_total()
-        
+
         lines = []
         lines.append(f"\n{Fore.YELLOW}{Style.BRIGHT}{total} classifiers available, listed by category:{Style.RESET_ALL}\n")
-        
+
         for cat in sorted(cat_to_labels):
             lines.append(f"{Fore.CYAN}{Style.BRIGHT}{cat}:{Style.RESET_ALL}")
             for label in sorted(cat_to_labels[cat], key=natural_sort_key):
@@ -531,8 +595,6 @@ def show_intro_help(om=None):
     """
     Show introduction/help for numclass: features, usage, and menu options.
     """
-    init(autoreset=True)
-
     cat_to_labels, total = get_cat_to_labels_and_total()
 
     intro_lines = [
@@ -541,28 +603,28 @@ def show_intro_help(om=None):
         f"{'-'*79}",
         f"{Fore.LIGHTWHITE_EX}Explore the fascinating world of integer classifications.{Style.RESET_ALL}",
         "",
-        f"Discover the hidden mathematical properties of any integer — from the most",
-        f"famous sequences to delightful oddities.",
+        "Discover the hidden mathematical properties of any integer — from the most",
+        "famous sequences to delightful oddities.",
         "",
-        f" • Find out if a number is Prime, Perfect, Abundant, Deficient, ... for classic math fans.",
+        " • Find out if a number is Prime, Perfect, Abundant, Deficient, ... for classic math fans.",
         " • Amicable, Keith, Cake, Untouchable, ... for the curious.",
-        f" • Enjoy playful categories: Fun number, Cyclops number, Repdigit, Evil, ",
-        "   and mmany more from pop culture, computing, science fiction, internet lore, and memes.",
+        " • Enjoy playful categories: Fun number, Cyclops number, Repdigit, Evil, ",
+        "   and many more from pop culture, computing, science fiction, internet lore, and memes.",
         "",
         f"{Fore.YELLOW}Features:{Style.RESET_ALL}",
         f" • {total} classifications available.",
-        f" • Shows detailed explanations, decompositions, and references.",
-        f" • Handy links to the On-Line Encyclopedia of Integer Sequences (OEIS).",
+        " • Shows detailed explanations, decompositions, and references.",
+        " • Handy links to the On-Line Encyclopedia of Integer Sequences (OEIS).",
         "",
         f"{Fore.MAGENTA + Style.BRIGHT}Usage:{Style.RESET_ALL}",
-        f" • Enter an integer and press enter, numclass shows number and divisor ",
-        f"   statistics and all its classifications.",
-        f" • Commas are allowed as thousand separators. Press Ctrl-C to skip long calculations.",
+        " • Enter an integer and press enter, numclass shows number and divisor ",
+        "   statistics and all its classifications.",
+        " • Commas are allowed as thousand separators. Press Ctrl-C to skip long calculations.",
         " • You can customize your experience in user/settings.py.",
         "",
         f"{Fore.CYAN}Tips:{Style.RESET_ALL}",
-        f" • For command-line options, run: python numclass.py --help",
-        f" • numclass adapts to your terminal window size, try resizing for the best view!",
+        " • For command-line options, run: python numclass.py --help",
+        " • numclass adapts to your terminal window size, try resizing for the best view!",
         "",
         f"{Fore.GREEN}Next steps:{Style.RESET_ALL}",
         "",
@@ -609,7 +671,16 @@ def show_oeis_references(om=None):
     """
     from collections import defaultdict
 
-    # Collect labels by OEIS sequence
+    # Build LABEL_TO_OEIS from imported classifiers to ensure it's up to date
+    global LABEL_TO_OEIS
+    LABEL_TO_OEIS = {}
+    for fn in TEST_FUNCTIONS_ALL.values():
+        label = getattr(fn, "label", None)
+        oeis = getattr(fn, "oeis", None)
+        if label and oeis:
+            LABEL_TO_OEIS[label] = oeis
+
+    # Group labels by OEIS ID
     oeis_to_labels = defaultdict(list)
     for label, oeis in LABEL_TO_OEIS.items():
         if oeis:
@@ -620,24 +691,27 @@ def show_oeis_references(om=None):
         ""
     ]
 
-    # First, build the prefix strings to compute max width
     prefix_label_list = []
     for oeis in sorted(oeis_to_labels, key=lambda s: (s or "")):
         labels = ", ".join(sorted(oeis_to_labels[oeis], key=str.lower))
         prefix = f"  {Fore.GREEN}{oeis}{Style.RESET_ALL}: {labels}"
         prefix_label_list.append((prefix, oeis))
 
-    # Find max prefix width (without color codes for alignment)
+    if not prefix_label_list:
+        lines.append("(none)")
+        paginate_output(lines, get_terminal_height() - 1, om=om)
+        return
+
+    # Compute max width for proper URL alignment
     max_prefix_width = max(len(strip_ansi(prefix)) for prefix, _ in prefix_label_list)
 
-    # Add padded lines
-    for (prefix, oeis) in prefix_label_list:
+    for prefix, oeis in prefix_label_list:
         url = f"https://oeis.org/{oeis}"
         pad = max_prefix_width - len(strip_ansi(prefix))
         lines.append(f"{prefix}{' ' * pad}{Fore.LIGHTBLACK_EX} {url}{Style.RESET_ALL}")
 
     lines.append("")
-    paginate_output(lines, get_terminal_height() - 2, om=om)
+    paginate_output(lines, get_terminal_height() - 1, om=om)
 
 
 def show_example_inputs(om=None):
@@ -649,9 +723,9 @@ def show_example_inputs(om=None):
         "42          (Sum of Three cubes, Highly abundant, fun number, ...)",
         "89          (Disarium, Fibonacci, Palindromic prime, Thick prime, ...)",
         "153         (Narcissistic, Octal interpretable, Harshad triangular, ...)",
-        "163         (Lucky Euler number",
+        "163         (Lucky Euler number)",
         "276         (Aliquot open sequence, Erdős-Woods, Fermat Pseudoprime, ...)",
-        "561         (Carmichael, Fermat en Euler-Jacobi pseudoprimes, Hexagonal...)",
+        "561         (Carmichael, Fermat en Euler-Jacobi pseudoprimes, Hexagonal, ...)",
         "796         (Boring number... say what?, ...)",
         "1089        (digit-reversal constant, perfect square, sum of palindromes, ...)",
         "1260        (Vampire, Super abundant, Pronic, Highly composite, ...)",
@@ -664,7 +738,7 @@ def show_example_inputs(om=None):
         "169808691   (Strobogrammatic, Cyclops, Self, Lychrel candidate, ...)",
         "193764528   (Pandigital, Odious, ...)",
         "459818240   (Triperfect, Practical, Evil, Semiperfect, ...)",
-        "74596893730427      (Keith prime, Gaussian prime, Isolated prime, ... )",
+        "74596893730427      (Keith prime, Gaussian prime, Isolated prime, ...)",
         "52631578947368421   (Cyclic, ...)",
         "192137918101841817  (Motzkin, ...)",
         "1000111100101100100010011111001000101  (Binary interpretable, Deficient, ...)",
@@ -689,8 +763,17 @@ def cli_main():
 
     args = parser.parse_args()
 
+    # Validate CLI override (if provided) and decide final output target
+    try:
+        cli_out = validate_output_setting(args.output)
+    except ValueError as e:
+        print(f"Fatal error in --output: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    final_output = cli_out if cli_out is not None else settings.OUTPUT_FILE
+
     def make_output_manager(n=None):
-        return OutputManager(output_file=args.output or settings.OUTPUT_FILE, quiet=args.quiet, number=n)
+        return OutputManager(output_file=final_output, quiet=args.quiet, number=n)
 
     # CLI (number provided)
     if args.number is not None:

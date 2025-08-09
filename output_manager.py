@@ -1,33 +1,13 @@
 # output_manager.py
 
 import os
-import re
-import sys
-from colorama import Fore, Style
+from utility import strip_ansi
 
-def strip_ansi(s):
-    """
-    Strip ANSI sequences from text (used when writing to a file).
-    """
-    ansi_escape = re.compile(r'\x1b\[[0-9;]*m')
-    return ansi_escape.sub('', s)
-
-import os
-import re
-import sys
-from colorama import Fore, Style
-
-def strip_ansi(s):
-    """
-    Strip ANSI sequences from text (used when writing to a file).
-    """
-    ansi_escape = re.compile(r'\x1b\[[0-9;]*m')
-    return ansi_escape.sub('', s)
 
 class OutputManager:
     """
     Handles all printing/output, including to screen and/or file.
-    
+
     Usage:
         om = OutputManager(output_file="results/", number=42)
         om.write("Hello")  # prints and writes to file (results/42.txt)
@@ -54,7 +34,8 @@ class OutputManager:
             if output_file in (".", "./") or output_file.endswith("/"):
                 # Per-number file in current or specified dir
                 if number is None:
-                    raise ValueError("A number must be provided when outputting to a directory.")
+                    raise ValueError("A number must be provided when "
+                                     "outputting to a directory.")
                 directory = output_file
                 if not directory.endswith("/"):
                     directory += "/"
@@ -69,7 +50,6 @@ class OutputManager:
                     os.makedirs(dirpart, exist_ok=True)
                 self._file_handle = open(output_file, "a", encoding="utf-8")
 
-
     def write(self, *args, sep=" ", end="\n"):
         """Write to screen and file."""
         text = sep.join(str(a) for a in args) + end
@@ -80,25 +60,21 @@ class OutputManager:
             self._file_handle.write(strip_ansi(text))
             self._file_handle.flush()
 
-
     def write_screen(self, *args, sep=" ", end="\n", flush=True):
         """
         Write only to the screen, never to the file.
         """
         print(*args, sep=sep, end=end)
 
-
     def getvalue(self):
         """Returns everything printed (with color codes)."""
         return "".join(self._buffer)
-
 
     def close(self):
         """Closes the output file if open."""
         if hasattr(self, '_file_handle') and self._file_handle:
             self._file_handle.close()
             self._file_handle = None
-
 
     def __del__(self):
         self.close()

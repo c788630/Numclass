@@ -159,8 +159,9 @@ def is_kaprekar_constant_3_digit(n: int) -> Tuple[bool, str]:
     - This process converges to 495, the 3-digit Kaprekar constant.
     """
     if n == 495:
-        return True, ("Repeatedly subtract any number formed by its digits in ascending order"
-                     " from that in descending order. This process converges to the Kaprekar constant 495.")
+        return True, ("Repeatedly subtract any number formed by its digits in "
+                      "ascending order from that in descending order. This "
+                      "process converges to the Kaprekar constant 495.")
     return False, None
 
 
@@ -178,8 +179,9 @@ def is_kaprekar_constant_4_digit(n: int) -> Tuple[bool, str]:
     - This process converges to 6174, the 4-digit Kaprekar constant.
     """
     if n == 6174:
-        return True, ("Repeatedly subtract any number formed by its digits in ascending order"
-                     " from that in descending order. This process converges to the Kaprekar constant 6175.")
+        return True, ("Repeatedly subtract any number formed by its digits in "
+                      "ascending order from that in descending order. This "
+                      "process converges to the Kaprekar constant 6175.")
     return False, None
 
 

@@ -3,8 +3,7 @@
 # -----------------------------------------------------------------------------
 
 from decorators import classifier, limited_to
-from math import log, log2
-from sympy import isprime, factorint, prime, primepi, primerange, prevprime, nextprime
+from sympy import isprime, factorint, prime, primepi, prevprime, nextprime
 from itertools import permutations
 from typing import Tuple
 from utility import get_ordinal_suffix
@@ -27,22 +26,37 @@ which have a lookup list.
     category=CATEGORY
 )
 @limited_to(99999999)
-def is_absolute_prime(n: int) -> Tuple[bool, str]:
+def is_absolute_prime(n: int):
     """
     Check if n is an absolute (permutable) prime.
     Details show all unique permutations and whether they're prime.
     """
-    if n < 2:
-        return False, None
-    s = str(n)
-    perms = sorted({int("".join(p)) for p in set(permutations(s))})
-    prime_perms = [p for p in perms if isprime(p)]
-    all_are_prime = len(prime_perms) == len(perms) and isprime(n)
+    if n in {2, 3, 5, 7}:
+        return True, "single-digit absolute prime"
 
-    if all_are_prime and len(perms) > 1:
-        details = "All digit permutations are prime: " + ", ".join(str(x) for x in perms)
-        return True, details
-    return False, None
+    s = str(n)
+
+    # quick digit filter (kills most candidates fast)
+    if any(d in s for d in "024568"):
+        return False, "has 0/even/5 digit → some permutation is composite"
+
+    # optional: also prune by last digit rule
+    if s[-1] not in "1379":
+        return False, "ends with non-prime-possible digit"
+
+    # check all unique, same-length permutations
+    seen = set()
+    for p in set(permutations(s)):
+        if p[0] == '0':
+            # presence of 0 already rejected above, but keep this guard if you drop that early reject
+            return False, "permutation with leading zero is invalid"
+        m = int("".join(p))
+        if m not in seen:
+            seen.add(m)
+            if not isprime(m):
+                return False, f"permutation {m} is composite"
+
+    return True, "all same-length permutations are prime"
 
 
 @classifier(
@@ -118,43 +132,30 @@ def is_catalan_prime(n: int) -> Tuple[bool, str]:
     oeis="A109611",
     category=CATEGORY
 )
-def is_chen_prime(n: int) -> Tuple[bool, str]:
+def is_chen_prime(n: int):
     """
-    Check if n is a Chen prime.
-    Details explain whether n+2 is prime or semiprime.
+    Return (True, message) if n is a Chen prime; else (False, None).
+    Chen: n prime and (n+2) is prime or semiprime (two prime factors with multiplicity).
     """
-    if n < 2:
-        return False, None
-    if not isprime(n):
-        return False, None
+    if n < 2 or not isprime(n):
+        return (False, None)
 
     q = n + 2
-    if isprime(q):
-        details = f"{n} is prime and {q} is also prime (Chen pair)."
-        return True, details
 
-    # Check if q is semiprime (exactly two prime factors, counted with multiplicity)
-    factors = []
-    temp = q
-    for prime_factors in primerange(2, int(q**0.5) + 1):
-        if temp % prime_factors == 0:
-            factors.append(prime_factors)
-            temp //= prime_factors
-            if temp % prime_factors == 0:
-                factors.append(prime_factors)
-                temp //= prime_factors
-                break
-            if isprime(temp):
-                factors.append(temp)
-                temp = 1
-                break
-    if temp > 1 and temp != q:
-        # temp is a factor greater than sqrt(q)
-        factors.append(temp)
-    if len(factors) == 2 and factors[0] != 1 and factors[1] != 1:
-        details = f"{n} is prime and {q} = {factors[0]} × {factors[1]} is semiprime (Chen pair)."
-        return True, details
-    return False, None
+    # Fast path: twin prime
+    if isprime(q):
+        return True, f"{n} is a Chen prime: p+2 = {q} is prime (twin prime)."
+
+    # Semiprime check: exactly two prime factors counted with multiplicity
+    factors = factorint(q)  # {prime: exponent}
+    if sum(factors.values()) == 2:
+        parts = " * ".join(
+            f"{pr}^{exp}" if exp > 1 else f"{pr}"
+            for pr, exp in sorted(factors.items())
+        )
+        return True, f"{n} is a Chen prime: p+2 = {q} is semiprime ({parts})."
+
+    return (False, None)
 
 
 @classifier(
@@ -271,39 +272,20 @@ def is_fermat_prime(n: int):
 @classifier(
     label="Gaussian prime",
     description="Prime in the ring of Gaussian integers.",
-    oeis="A055025",
+    oeis="A002145",
     category=CATEGORY
 )
 def is_gaussian_prime(n: int) -> Tuple[bool, str]:
     """
-    Check whether n is a Gaussian prime in Z[i].
-    Details include the type (congruent to 3 mod 4, or sum of squares, etc.)
+    Check whether n is a Gaussian prime in Z[i] lying on the real axis.
+    Details include the type congruent to 3 mod 4.
     """
     if n < 2:
         return False, None
-    # Case 1: Prime and 3 mod 4
+    # Prime and 3 mod 4
     if isprime(n) and n % 4 == 3:
         details = f"{n} is a (rational) prime and {n} ≡ 3 mod 4; thus, a Gaussian prime."
         return True, details
-
-    # Case 2: n = a^2 + b^2, n prime, both a and b nonzero
-    if isprime(n) and n % 4 == 1:
-        # Find a representation as a^2 + b^2
-        for a in range(1, int(n ** 0.5) + 1):
-            b2 = n - a*a
-            b = int(b2 ** 0.5)
-            if b > 0 and b * b == b2:
-                details = (f"{n} is a (rational) prime ≡ 1 mod 4 and can be written as "
-                           f"{a}^2 + {b}^2; thus, {a} + {b}i is a Gaussian prime.")
-                return True, details
-
-    # Case 3: n = p^2, where p is a rational prime ≡ 3 mod 4
-    if n > 1:
-        sqrt_n = int(n ** 0.5)
-        if sqrt_n * sqrt_n == n and isprime(sqrt_n) and sqrt_n % 4 == 3:
-            details = (f"{n} = {sqrt_n}^2, and {sqrt_n} is a prime ≡ 3 mod 4; "
-                       "this is the norm of a Gaussian prime on the axes.")
-            return True, details
 
     return False, None
 
@@ -456,6 +438,27 @@ def is_motzkin_prime(n: int) -> Tuple[bool, str]:
     return False, None
 
 
+def _is_power_of_two(x: int) -> bool:
+    return x > 0 and (x & (x - 1)) == 0
+
+
+def _is_2a_3b(x: int) -> tuple[bool, int, int]:
+    """
+    Return (True,a,b) if x = 2^a * 3^b for integers a,b >= 0; else (False,0,0).
+    """
+    if x <= 0:
+        return (False, 0, 0)
+    a = 0
+    while (x & 1) == 0:  # divide out 2s
+        x >>= 1
+        a += 1
+    b = 0
+    while x % 3 == 0:    # divide out 3s
+        x //= 3
+        b += 1
+    return (x == 1, a, b)
+
+
 @classifier(
     label="Pierpont prime",
     description="Prime of form 2^a·3^b+1, also known as Class 1 primes.",
@@ -463,30 +466,24 @@ def is_motzkin_prime(n: int) -> Tuple[bool, str]:
     category=CATEGORY
 )
 @limited_to(99999999)
-def is_pierpont_prime(n: int) -> Tuple[bool, str]:
+def is_pierpont_prime(n: int):
     """
-    Check if n is a Pierpont prime (of the first or second kind).
-    Details show exponents: n = 2^a·3^b ± 1
+    Pierpont prime test (first or second kind):
+      n is prime and either n-1 or n+1 equals 2^a * 3^b for some a,b >= 0.
+    Returns (True, message) or (False, None).
     """
     if n < 2 or not isprime(n):
-        return False, None
+        return (False, None)
 
-    for sign, opstr in [(-1, "- 1"), (1, "+ 1")]:
-        candidate = n - sign
-        max_a = int(log(candidate, 2)) + 1 if candidate > 0 else 0
-        for a in range(max_a):
-            pow2 = 2 ** a
-            if candidate % pow2 != 0:
-                continue
-            quotient = candidate // pow2
-            if quotient < 1:
-                continue
-            # Now check if quotient is a power of 3
-            b = log(quotient, 3)
-            if b.is_integer():
-                details = f"{n} = 2^{a}·3^{int(b)} {opstr}"
-                return True, details
-    return False, None
+    ok1, a1, b1 = _is_2a_3b(n - 1)
+    if ok1:
+        return (True, f"{n} is a Pierpont prime: n - 1 = 2^{a1} · 3^{b1}")
+
+    ok2, a2, b2 = _is_2a_3b(n + 1)
+    if ok2:
+        return (True, f"{n} is a Pierpont prime: n + 1 = 2^{a2} · 3^{b2}")
+
+    return (False, None)
 
 
 @classifier(
@@ -534,18 +531,42 @@ def is_primorial_prime(n: int) -> Tuple[bool, str]:
     category=CATEGORY
 )
 @limited_to(99999999)
-def is_proth_prime(n: int) -> Tuple[bool, str]:
+def is_proth_prime(n: int):
     """
-    Check if n is a Proth prime.
-    Details show n = k·2^n + 1 with odd k < 2^n.
+    Return (True, msg) if n is a Proth prime, else (False, None).
+
+    A Proth number has the form n = k*2^m + 1 with k odd and 2^m > k.
+    A Proth prime is a Proth number that is prime. By Proth's theorem,
+    a Proth number n is prime iff there exists a such that a^((n-1)/2) ≡ -1 (mod n).
     """
-    if n < 3 or not isprime(n):
+    # Quick rejects
+    if n < 3 or (n & 1) == 0:
         return False, None
-    for m in range(1, int(log2(n))):
-        k = (n - 1) / (2 ** m)
-        if k.is_integer() and int(k) % 2 == 1 and k < 2 ** n:
-            details = f"{n} = {int(k)}·2^{m} + 1 (k = {int(k)}, m = {m})"
-            return True, details
+
+    t = n - 1
+
+    # Extract the largest power of two dividing (n-1): t = (2^m) * k, k odd
+    pow2 = t & -t                 # value 2^m
+    m = pow2.bit_length() - 1     # m = v2(t)
+    k = t // pow2                 # odd part
+
+    # Check Proth form condition: k odd (by construction) and 2^m > k
+    if not (pow2 > k and (k & 1) == 1):
+        return False, None
+
+    # Proth's theorem: find a witness 'a' with a^((n-1)/2) ≡ -1 (mod n)
+    e = t // 2
+    for a in (3, 5, 7, 10, 11, 13, 17, 19, 23, 29):
+        if a % n == 0:
+            continue
+        # If gcd(a, n) > 1 then n is composite; skip/early-return False.
+        # (We can skip gcd to keep it cheap; pow will still work, but this is tidy.)
+        # from math import gcd
+        # if gcd(a, n) != 1: return False, None
+        if pow(a, e, n) == n - 1:  # ≡ -1 mod n
+            return True, f"{n} is a Proth prime: n = {k}·2^{m} + 1, witness a = {a}"
+
+    # No witness found among small bases → n is composite (for Proth numbers)
     return False, None
 
 

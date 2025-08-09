@@ -23,7 +23,7 @@ MAX_SOLUTIONS_SUM_OF = {
     "2_SQUARES": None,                 
     "3_SQUARES": 20,
     "2_CUBES": None,
-    "3_CUBES": None,
+    "3_CUBES": 20,
 }
 
 # Maximum results for sum-of-palindromes decompositions.
@@ -91,7 +91,7 @@ SHOW_DIVISORS = True
 DIVISORLIST_LIMIT = None              
 
 # Aliquot sequence output settings:
-ALIQOUT_SEQUENCE = True   # Show the Aliquot sequence for each number?
+ALIQUOT_SEQUENCE = True     # Show the Aliquot sequence for each number
 ALIQUOTLIST_LIMIT = None    # Maximum steps to display (None = unlimited)
 
 # OUTPUT_FILE = None or ""        # No file output
