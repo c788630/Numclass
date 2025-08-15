@@ -2,20 +2,18 @@
 Test suite for numclass.py
 
 Author: Marcel M W van Dinteren <m.vandinteren1@chello.nl>
-Date: 2024-07-31
+Date: 2024-08-15
 
 usage pytest -v
-
 """
- 
+
 import os
-import sys
 import pytest
+import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '.')))
 
-from numclass import classify_number
-
+from .numclass import classify_number
 
 # List of (test_number, [classification labels]) pairs
 TEST_CASES = [
@@ -88,6 +86,7 @@ TEST_CASES = [
     (106,   ["Ulam number"]),
 
     # Mathematical Curiosities (16)
+    (1235813,["Additive sequence"]),
     (796,   ["Boring number"]),
     (26,    ["Cake number"]),
     (12012, ["Cyclops number"]),
@@ -121,7 +120,7 @@ TEST_CASES = [
     (91,    ["Triangular number"]),
 
     # Prime & Prime-related Numbers (48)
-    #     Atomic Primes (28)
+    # Atomic Primes (28)
     (113,   ["Absolute prime"]),
     (53,    ["Balanced prime"]),
     (5,     ["Catalan prime"]),
@@ -131,7 +130,7 @@ TEST_CASES = [
     (13,    ["emirp"]),
     (5039,  ["Factorial prime"]),
     (65537, ["Fermat prime"]),
-    (61,    ["Gaussian prime"]),
+    (19,    ["Gaussian prime"]),
     (967,   ["Good prime"]),
     (197,   ["Keith prime"]),
     (13,    ["Left-truncatable prime"]),
@@ -173,18 +172,18 @@ TEST_CASES = [
 
     # Pseudoprimes and Cryptographic Numbers (7)
     (561,   ["Carmichael number"]),
-    (561,   ["Euler-Jacobi pseudoprime"]), # base 2
-    (121,   ["Euler-Jacobi pseudoprime"]), # base 3
-    (781,   ["Euler-Jacobi pseudoprime"]), # base 5
-    (325,   ["Euler-Jacobi pseudoprime"]), # base 7
-    (133,   ["Euler-Jacobi pseudoprime"]), # base 11
-    (85,    ["Euler-Jacobi pseudoprime"]), # base 13
-    (341,   ["Fermat pseudoprime"]), # base 2
-    (121,   ["Fermat pseudoprime"]), # base 3
-    (781,   ["Fermat pseudoprime"]), # base 5
-    (10585, ["Fermat pseudoprime"]), # base 7
-    (2465,  ["Fermat pseudoprime"]), # base 11
-    (244,   ["Fermat pseudoprime"]), # base 13
+    (561,   ["Euler-Jacobi pseudoprime"]),  # base 2
+    (121,   ["Euler-Jacobi pseudoprime"]),  # base 3
+    (781,   ["Euler-Jacobi pseudoprime"]),  # base 5
+    (325,   ["Euler-Jacobi pseudoprime"]),  # base 7
+    (133,   ["Euler-Jacobi pseudoprime"]),  # base 11
+    (85,    ["Euler-Jacobi pseudoprime"]),  # base 13
+    (341,   ["Fermat pseudoprime"]),  # base 2
+    (121,   ["Fermat pseudoprime"]),  # base 3
+    (781,   ["Fermat pseudoprime"]),  # base 5
+    (10585, ["Fermat pseudoprime"]),  # base 7
+    (2465,  ["Fermat pseudoprime"]),  # base 11
+    (244,   ["Fermat pseudoprime"]),  # base 13
 ]
 
 # Prepare items and IDs for pytest parametrization

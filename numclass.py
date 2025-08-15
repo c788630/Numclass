@@ -2,8 +2,8 @@
 Number Classifier - Mathematical Classifications and Curiosities
 
 Author:      Marcel M W van Dinteren <m.vandinteren1@chello.nl>
-Date:        2025-08-05
-Version:     1.0.1
+Date:        2025-08-15
+Version:     1.1.0
 
 Description:
     Classifies an integer n according to various mathematical properties
@@ -36,7 +36,7 @@ License:
 
 """
 
-__version__ = "1.0.1"
+__version__ = "1.1.0"
 
 import importlib.util
 import sys
@@ -66,14 +66,16 @@ from collections import OrderedDict, defaultdict
 from colorama import init, Fore, Style
 from decorators import TEST_LIMITS
 from output_manager import OutputManager
-from utility import (clear_screen, digital_root_sequence, natural_sort_key,
-                     parity, digit_sum, digit_product,
-                     get_terminal_width, get_terminal_height,
-                     intersection_details_from_atomic, strip_ansi,
-                     suppress_atomic_components, filter_maximal_intersections,
-                     format_prime_factors, compute_aliquot_sequence,
-                     format_aliquot_sequence, import_classifier_functions,
-                     carmichael_with_details, totient_with_details,
+from utility import (carmichael_with_details, clear_screen,
+                     compute_aliquot_sequence, digit_product,
+                     digital_root_sequence, digit_sum,
+                     filter_maximal_intersections, format_aliquot_sequence,
+                     format_prime_factors, get_terminal_height,
+                     get_terminal_width, import_classifier_functions,
+                     intersection_details_from_atomic, mobius_and_radical,
+                     multiplicative_persistence_sequence, natural_sort_key,
+                     parity, strip_ansi, repetend_info_base10,
+                     suppress_atomic_components, totient_with_details,
                      validate_output_setting)
 
 init(autoreset=True)
@@ -425,6 +427,32 @@ def print_statistics(n: int, show_details: bool = True, om=None):
     dr_seq_str = " → ".join(str(x) for x in dr_seq)
     om.write(f"  {'Digital root of |n|:':<{ALIGN_WIDTH}}{dr_seq[-1]} (sequence: {dr_seq_str})")
 
+    # Additive persistence (value + optional sequence)
+    ap_steps = len(dr_seq) - 1
+    label = "Add. persistence:"
+    left = f"  {label:<{ALIGN_WIDTH}}{ap_steps}"
+    om.write(left)
+
+    mp_seq = multiplicative_persistence_sequence(n)
+    mp = len(mp_seq) - 1
+    mp_details = " (sequence: " + " → ".join(str(x) for x in mp_seq) + ")"
+
+    if show_details:
+        mp_details = " (sequence: " + " → ".join(str(x) for x in mp_seq) + ")"
+    else:
+        mp_details = ""
+
+    label = "Mult. persistence:"
+    left = f"  {label:<{ALIGN_WIDTH}}{str(mp)}"
+    if mp_details:
+        wrapped = format_details(mp_details, start_col=len(left))
+        first, *rest = wrapped.splitlines()
+        om.write(left + first)
+        for ln in rest:
+            om.write(ln)
+    else:
+        om.write(left)
+
     abs_n = abs(n)
 
     # Factor once; skip 0/±1
@@ -463,7 +491,7 @@ def print_statistics(n: int, show_details: bool = True, om=None):
             if not details or not show_details:
                 om.write(left.rstrip())
                 return
-            wrapped = format_details(details, start_col=len(left))
+            wrapped = format_details(details, start_col=24)
             first, *rest = wrapped.splitlines()
             om.write(left + first)
             for line in rest:
@@ -471,6 +499,26 @@ def print_statistics(n: int, show_details: bool = True, om=None):
 
         _emit("Euler's totient φ(n):", phi_s, f"({phi_details})")
         _emit("Carmichael λ(n):",      lam_s, f"({lam_details})")
+
+    # Repetend
+    if n != 0:
+        rep_type, *rep_data = repetend_info_base10(n, factors)
+        if rep_type == "terminates":
+            digits = rep_data[0]
+            digit_word = "digit" if digits == 1 else "digits"
+            om.write(f"  1/n (base 10):        terminates, {digits} {digit_word}")
+        elif rep_type == "repeats":
+            period, preperiod = rep_data
+            if preperiod == 0:
+                om.write(f"  1/n (base 10):        repeats, period {period}")
+            else:
+                om.write(f"  1/n (base 10):        repeats, period {period}, preperiod {preperiod}")
+
+    # Möbius μ(n) and radical rad(n), only meaningful for |n| > 1
+    if abs_n > 1:
+        mu, rad, sqf = mobius_and_radical(factors)
+        om.write(f"  {'Möbius μ(n):':<{ALIGN_WIDTH}}{mu}")
+        om.write(f"  {'Radical rad(n):':<{ALIGN_WIDTH}}{rad}")
 
     # -- Divisor statistics (of |n|)
     if n != 0:
@@ -490,10 +538,10 @@ def print_statistics(n: int, show_details: bool = True, om=None):
         om.write(f"  {'Number of divisors:':<22}{num_divs}")
         if show_div and ((max_divs is None) or (num_divs <= max_divs)):
             om.write(f"  {'Divisors:':<22}{s_wrapped.strip()}")
-        om.write(f"  {'Sum of divisors:':<22}{sum_divs}")
+        om.write(f"  {'Sum of divisors σ(n):':<22}{sum_divs}")
 
         if n > 0 and aliquot_seq:
-            om.write(f"  {'Aliquot sum:':<22}{aliquot}")
+            om.write(f"  {'Aliquot sum σ(n)−n:':<22}{aliquot}")
 
             MAX_ALIQUOT_STEPS = getattr(settings, "MAX_ALIQUOT_STEPS", 50)
             seq, highlight_idx, aborted, skipped = compute_aliquot_sequence(
@@ -651,10 +699,13 @@ def show_intro_help(om=None):
         key = get_keypress().strip().lower()
         clear_line()
         if key == 'l':
+            clear_screen()
             show_classifier_list(om)
         elif key == 'r':
+            clear_screen()
             show_oeis_references(om)
         elif key == 'e':
+            clear_screen()
             show_example_inputs(om)
         elif key == 'q' or key == '':
             break

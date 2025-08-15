@@ -15,8 +15,23 @@ import traceback
 
 from colorama import Fore, Style
 from functools import lru_cache
+from math import gcd
 from sympy import divisors, factorint, divisor_sigma, isprime, lcm
 from user import settings
+
+
+def _divisors_from_factorization(f: dict[int, int]) -> list[int]:
+    """Return all positive divisors from a prime-power factorization dict."""
+    ds = [1]
+    for p, e in f.items():
+        cur = []
+        pe = 1
+        for _ in range(e + 1):
+            for d in ds:
+                cur.append(d * pe)
+            pe *= p
+        ds = cur
+    return sorted(set(ds))
 
 
 @lru_cache(maxsize=None)
@@ -442,6 +457,43 @@ def load_oeis_bfile(filename):
     return numbers_set, numbers_list
 
 
+def mobius_and_radical(factors: dict[int, int]) -> tuple[int, int, bool]:
+    """
+    Return (μ(n), rad(n), squarefree) from a prime factor dict.
+    μ(n)=0 if any exponent>1; else (-1)^ω(n).  rad(n)=∏p.
+    """
+    rad = 1
+    squarefree = True
+    for p, e in factors.items():
+        rad *= p
+        if e > 1:
+            squarefree = False
+    mu = 0 if not squarefree else (-1 if (len(factors) % 2) else 1)
+    return mu, rad, squarefree
+
+
+def multiplicative_persistence_sequence(n: int) -> list[int]:
+    """
+    Return the multiplicative persistence sequence for |n|.
+    Repeatedly replace x with the product of its decimal digits until x < 10.
+    Example: 39 → [39, 27, 14, 4] (persistence = 3)
+    """
+    x = abs(n)
+    seq = [x]
+    while x >= 10:
+        prod = 1
+        for ch in str(x):
+            prod *= int(ch)
+        x = prod
+        seq.append(x)
+    return seq
+
+
+def multiplicative_persistence(n: int) -> int:
+    """Number of steps in multiplicative_persistence_sequence(n)."""
+    return max(0, len(multiplicative_persistence_sequence(n)) - 1)
+
+
 def natural_sort_key(s):
     # Split string into parts: digits as ints, non-digits as lower-case strings
     return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', s)]
@@ -468,6 +520,54 @@ def parity(n: int):
     if n % 2 == 0:
         return "Even"
     return "Odd"
+
+
+# --- Number-stat helpers (factorization-aware) ---
+
+def repetend_info_base10(n: int, factors: dict[int, int] | None = None):
+    """
+    Info about decimal expansion of 1/n in base 10.
+
+    Returns:
+      ('terminates', k)               if 1/n terminates with exactly k digits
+      ('repeats', period, preperiod)  otherwise (period length, preperiod length)
+
+    For n = 2^a * 5^b * m, preperiod = max(a, b); if m=1 it terminates.
+    The repetend length is the multiplicative order of 10 modulo m, which divides λ(m).
+    """
+    if n <= 0:
+        return None
+
+    if factors is None:
+        factors = factorint(n)
+
+    a = factors.get(2, 0)
+    b = factors.get(5, 0)
+    preperiod = max(a, b)
+
+    # strip 2s & 5s from n to get m
+    m = n // (2**a * 5**b)
+    if m == 1:
+        return ('terminates', preperiod)
+
+    # compute λ(m) from factorization of m, then find the smallest d | λ(m) with 10^d ≡ 1 (mod m)
+    from math import lcm
+    fac_m = {p: e for p, e in factors.items() if p not in (2, 5)}
+    if not fac_m:
+        # should not happen because m>1 and only 2,5 were removed
+        return ('terminates', preperiod)
+
+    # λ for each p^e (odd p): (p-1)p^{e-1}
+    lam = 1
+    for p, e in fac_m.items():
+        lam_pa = (p - 1) * (p ** (e - 1))
+        lam = lcm(lam, lam_pa)
+
+    fac_lam = factorint(lam)
+    for d in _divisors_from_factorization(fac_lam):
+        if pow(10, d, m) == 1:
+            return ('repeats', d, preperiod)
+    return ('repeats', lam, preperiod)
 
 
 def strip_ansi(s):

@@ -4,11 +4,12 @@
 
 import time
 
+from data.sum_of_3_cubes_solutions import SUM_OF_THREE_CUBES_SOLUTIONS
 from decorators import classifier, limited_to
 from functools import reduce
-from math import log
+from math import log, copysign, isqrt
 from sympy import factorint, divisor_sigma, divisors, gcd
-from typing import Tuple
+from typing import Tuple, Optional
 from user import settings
 from utility import load_oeis_bfile, analyze_divisors, get_ordinal_suffix
 
@@ -482,130 +483,148 @@ def is_sum_of_2_cubes(n: int, max_results: int = None) -> Tuple[bool, str]:
     Shows up to max_results results (None = all), smallest |a|,|b| first, unordered a ≤ b.
     Honors settings.ALLOW_ZERO_IN_DECOMP: if False, excludes any result with a==0 or b==0.
     """
-    if n == 0:
+    allow_zero = getattr(settings, "ALLOW_ZERO_IN_DECOMP", False)
+    cap = getattr(settings, "MAX_SOLUTIONS_SUM_OF", {}).get("2_CUBES", None)
+
+    absn = abs(n)
+    B = int(round(absn ** (1/3))) + 2  # simple bound; adjust if you have a better one
+
+    # precompute a^3 map: value -> list of a (capture both signs)
+    cubes = {}
+    for a in range(-B, B + 1):
+        cubes.setdefault(a*a*a, []).append(a)
+
+    seen = set()   # canonical pairs (a≤b) over integers
+    listed = []
+
+    for x in range(-B, B + 1):
+        need = n - x*x*x
+        ys = cubes.get(need, [])
+        for y in ys:
+            a, b = (x, y) if x <= y else (y, x)
+            if allow_zero or (a != 0 and b != 0):
+                tup = (a, b)
+                if tup not in seen:
+                    seen.add(tup)
+                    if cap is None or len(listed) < cap:
+                        listed.append(tup)
+
+    if not seen:
         return False, None
-    if max_results is None:
-        max_results = getattr(settings, "MAX_SOLUTIONS_SUM_OF", {}).get("2_CUBES", None)
 
-    allow_zero = getattr(settings, "ALLOW_ZERO_IN_DECOMP", True)
+    header = f"found {len(seen)}"
+    if cap is not None and len(listed) < len(seen):
+        header += f" (showing first {len(listed)})"
 
-    lim = int(abs(n) ** (1/3)) + 3  # search window
-
-    results = []
-    seen = set()
-    for a in range(-lim, lim + 1):
-        for b in range(a, lim + 1):  # a <= b avoids repeats
-            if a**3 + b**3 == n:
-                if not allow_zero and (a == 0 or b == 0):
-                    continue
-                pair = (a, b)
-                if pair not in seen:
-                    seen.add(pair)
-                    results.append(pair)
-            if max_results is not None and len(results) >= max_results:
-                break
-        if max_results is not None and len(results) >= max_results:
-            break
-
-    if results:
-        prefix = f"{n} = "
-        details = prefix + "; ".join(
-            f"{a}³ + {b}³" for (a, b) in results
-        )
-        return True, details
-    return False, None
+    tail = "; ".join(f"{a}³+{b}³" for (a, b) in listed)
+    details = f"{header}: {tail}" if listed else header
+    return True, details
 
 
-SUM_OF_THREE_CUBES_SOLUTIONS = {  # known hard solutions < 1000
-    3: (5699368212219623807203, -569936821113563493509, -472715493453327032),
-    33: (8866128975287528, -8778405442862239, -2736111468807040),
-    42: (80435758145817515, 80538738812075974, -12602123297335631),
-    74: (-284650292555885, 66229832190556, 283450105697727),
-    # 114: (unsolved (July 2025), search area ∣z∣ ≤ 10^16)
-    165: (383344975542639445, -385495523231271884, 98422560467622814),
-    # 390: (unsolved (July 2025), search area ∣z∣ ≤ 10^16)
-    579: (143075750505019222645, -143070303858622169975, -6941531883806363291),
-    # 627: (unsolved (July 2025), search area ∣z∣ ≤ 10^16)
-    # 633: (unsolved (July 2025), search area ∣z∣ ≤ 10^16)
-    # 732: (unsolved (July 2025), search area ∣z∣ ≤ 10^16)
-    795: (-14219049725358227, 14197965759741571, 2337348783323923),
-    906: (-74924259395619397, 72054089679353378, 35961979615356503),
-    # 921: (unsolved (July 2025), search area ∣z∣ ≤ 10^16)
-    # 975: (unsolved (July 2025), search area ∣z∣ ≤ 10^16)
-}
+def _icbrt_exact(m: int) -> Optional[int]:
+    """
+    Exact integer cube-root test.
+    Returns x if x^3 == m, else None. Works for negative m as well.
+    """
+    if m == 0:
+        return 0
+    neg = m < 0
+    a = -m if neg else m
+    # integer cube root via Newton's method (fast, no floats)
+    x = int(round(a ** (1/3)))  # good initial guess
+    # polish to exact (avoid float drift)
+    # adjust up/down until x^3 crosses a
+    while x > 0 and x**3 > a:
+        x -= 1
+    while (x + 1)**3 <= a:
+        x += 1
+    if x**3 != a:
+        return None
+    return -x if neg else x
 
 
 @classifier(
     label="Sum of 3 cubes",
     description="Can be written as n = a³ + b³ + c³ for integers a, b, c.",
     oeis="A003072",
-    category=CATEGORY
+    category=CATEGORY,
 )
-@limited_to(9999999999)
 def is_sum_of_3_cubes(n: int, max_results: int = None) -> Tuple[bool, str]:
     """
-    Returns (True, details) if n can be written as a³ + b³ + c³ for integers a, b, c.
-    Brute-forces up to a limit; always adds hardcoded "celebrity" solution if available.
-    Shows up to max_results results (None = all).
+    Show up to max_results found solutions (canonical a<=b<=c), and ALWAYS show
+    the known 'celebrity' solution if available, even when capped.
     """
+
+    # trivial / modular obstruction
     if n == 0:
         return False, None
     if n % 9 in (4, 5):
         return False, None
 
     allow_zero = getattr(settings, "ALLOW_ZERO_IN_DECOMP", True)
-
     if max_results is None:
-        max_results = getattr(settings, "MAX_SOLUTIONS_SUM_OF", {}).get("3_CUBES", None)
+        max_results = getattr(settings, "MAX_SOLUTIONS_SUM_OF", {}).get("3_CUBES", 20)
+    B = getattr(settings, "MAX_ABS_FOR_SUM_OF_3_CUBES", 100)
 
-    limit = getattr(settings, "MAX_ABS_FOR_SUM_OF_3_CUBES", 100)  # make limit configurable
-    results = []
-    seen = set()
-    for a in range(-limit, limit + 1):
-        for b in range(a, limit + 1):
-            for c in range(b, limit + 1):
-                if a**3 + b**3 + c**3 == n:
-                    if not allow_zero and (a == 0 or b == 0 or c == 0):
-                        continue
-                    tup = (a, b, c)
-                    if tup not in seen:
-                        seen.add(tup)
-                        results.append(tup)
-                if max_results is not None and len(results) >= max_results:
-                    break
-            if max_results is not None and len(results) >= max_results:
-                break
-        if max_results is not None and len(results) >= max_results:
-            break
+    seen = set()    # canonical triples (a<=b<=c)
+    listed = []     # what we print (respect cap when adding *found* ones)
 
-    # Always include known hard solution if not found by brute-force
-    celeb_tuple = None
+    # search with double loop + exact cube-root for c
+    for a in range(-B, B + 1):
+        a3 = a*a*a
+        for b in range(a, B + 1):
+            need = n - a3 - b*b*b
+            c = _icbrt_exact(need)
+            if c is None:
+                continue
+            if b <= c and (allow_zero or (a != 0 and b != 0 and c != 0)):
+                tup = (a, b, c)
+                if tup not in seen:
+                    seen.add(tup)
+                    if (max_results is None) or (len(listed) < max_results):
+                        listed.append(tup)
+
+    # inject celebrity (canonicalize and ensure it is visible)
+    celeb = None
     if n in SUM_OF_THREE_CUBES_SOLUTIONS:
-        celeb = tuple(sorted(SUM_OF_THREE_CUBES_SOLUTIONS[n]))
-        if celeb not in seen:
-            celeb_tuple = celeb
+        raw = SUM_OF_THREE_CUBES_SOLUTIONS[n]
+        celeb = tuple(sorted(raw))
+        if (allow_zero or all(v != 0 for v in celeb)) and celeb not in seen:
+            seen.add(celeb)
+            if max_results is None:
+                listed.append(celeb)
+            else:
+                if len(listed) < max_results:
+                    listed.append(celeb)
+                else:
+                    # ensure celebrity appears even when cap reached
+                    listed[-1] = celeb
 
-    def cube_fmt(x):
+    if not seen:
+        return False, None
+
+    def fmt(x: int) -> str:
         return f"({x})³" if x < 0 else f"{x}³"
 
-    details_list = []
-    if results:
-        details_list.extend(
-            f"{n} = {cube_fmt(a)} + {cube_fmt(b)} + {cube_fmt(c)}"
-            for (a, b, c) in results
-        )
-    if celeb_tuple:
-        details_list.append(
-            f"{n} = {cube_fmt(celeb_tuple[0])} + {cube_fmt(celeb_tuple[1])} + {cube_fmt(celeb_tuple[2])}"
-        )
+    # mark celebrity in the text (optional but helpful)
+    celeb_tag = (n in SUM_OF_THREE_CUBES_SOLUTIONS)
+    parts = []
+    for t in listed:
+        s = f"{fmt(t[0])} + {fmt(t[1])} + {fmt(t[2])}"
+        parts.append(s)
 
-    if details_list:
-        # Compact style: prefix, then joined
-        prefix_eq = f"{n} ="
-        exprs = [expr.split("=", 1)[1].strip() for expr in details_list]
-        details = f"{prefix_eq} " + "; ".join(exprs)
-        return True, details
-    return False, None
+    details = f"{n} = " + "; ".join(parts) if parts else f"found {len(seen)}"
+    return True, details
+
+
+def r2_sum_of_two_squares(factors: dict[int, int]) -> int:
+    prod = 1
+    for p, e in factors.items():
+        if p % 4 == 3 and (e % 2 == 1):
+            return 0
+        if p % 4 == 1:
+            prod *= (e + 1)
+    return 4 * prod
 
 
 @classifier(
@@ -614,46 +633,65 @@ def is_sum_of_3_cubes(n: int, max_results: int = None) -> Tuple[bool, str]:
     oeis="A001481",
     category=CATEGORY
 )
-def is_sum_of_2_squares(n: int, max_results: int = None) -> Tuple[bool, str]:
+def is_sum_of_2_squares(n: int) -> Tuple[bool, str]:
     """
     Returns (True, details) if n can be written as a^2 + b^2 for integers a, b.
     Shows up to max_results decompositions with a >= 0, b >= 0 and a <= b.
     Uses Fermat's theorem for quick check.
     """
-    if max_results is None:
-        max_results = getattr(settings, "MAX_SOLUTIONS_SUM_OF", {}).get("2_SQUARES", None)
-    if n < 1:
+    if n < 0:
         return False, None
 
-    for p, e in factorint(n).items():
-        if p % 4 == 3 and e % 2 != 0:
-            return False, None
+    allow_zero = getattr(settings, "ALLOW_ZERO_IN_DECOMP", False)
+    cap = getattr(settings, "MAX_SOLUTIONS_SUM_OF", {}).get("2_SQUARES", None)
 
-    results = []
-    seen = set()
-    lim = int(n**0.5) + 1
-    for a in range(0, lim):
-        b2 = n - a*a
-        if b2 < 0:
+    N = n
+    # exact total (ordered, with signs)
+    total_ordered = r2_sum_of_two_squares(factorint(N))
+    if total_ordered == 0:
+        return False, None
+
+    # enumerate canonical nonnegative pairs 0<=x<=y
+    listed = []
+    seen_count = 0  # number of canonical solutions found
+    r = isqrt(N)
+    for x in range(0, r + 1):
+        y2 = N - x*x
+        if y2 < 0:
             break
-        b = int(b2**0.5)
-        if b < a:
-            continue
-        if b*b == b2:
-            pair = (a, b)
-            if pair not in seen:
-                seen.add(pair)
-                results.append(pair)
-            if max_results is not None and len(results) >= max_results:
-                break
+        y = isqrt(y2)
+        if x*x + y*y == N and x <= y:
+            if allow_zero or (x > 0 and y > 0):
+                seen_count += 1
+                if cap is None or len(listed) < cap:
+                    listed.append((x, y))
 
-    if results:
-        details = f"{n} = " + "; ".join(
-            f"{a}² + {b}²" for (a, b) in results
-        )
-        return True, details
-    else:
+    if seen_count == 0 and not allow_zero:
+        # total_ordered>0 but all reps use a zero term and zeros are disallowed
         return False, None
+
+    header = f"total {total_ordered} (ordered, with signs)"
+    if cap is not None and len(listed) < seen_count:
+        header += f" (showing first {len(listed)} canonical)"
+    if listed:
+        total = len(listed) * 8
+        canonical_count = len(listed)
+        tail = "; ".join(f"{x}²+{y}²" for x, y in listed)
+        details = (f"total {total} (ordered, with signs), "
+                   f"{canonical_count} canonical: {tail}")
+    else:
+        details = f"total 0 (ordered, with signs), 0 canonical"
+
+    return True, details
+
+
+def _legendre_three_square_possible(n: int) -> bool:
+    """Legendre: n is sum of three squares iff n ≠ 4^a(8b+7)."""
+    if n < 0:
+        return False
+    while n % 4 == 0:
+        n //= 4
+    return (n % 8) != 7
 
 
 @classifier(
@@ -663,59 +701,91 @@ def is_sum_of_2_squares(n: int, max_results: int = None) -> Tuple[bool, str]:
     category=CATEGORY
 )
 @limited_to(9999999999)
-def is_sum_of_3_squares(n: int, max_decomps: int = None) -> Tuple[bool, str]:
+def is_sum_of_3_squares(n: int) -> Tuple[bool, str]:
     """
-    Returns (True, details) if n can be written as a² + b² + c² for integers a, b, c.
-    Honors settings.ALLOW_ZERO_IN_DECOMP. Shows up to max_decomps decompositions (unordered).
+    Fast check with Legendre's theorem; finds up to cap canonical triples (x≤y≤z), x,y,z≥0
+    unless ALLOW_ZERO_IN_DECOMP is False (then x,y,z>0).
     """
-    allow_zero = getattr(settings, "ALLOW_ZERO_IN_DECOMP", True)
-    if max_decomps is None:
-        max_decomps = getattr(settings, "MAX_SOLUTIONS_SUM_OF", {}).get("3_SQUARES", None)
-    if n < 1:
+    if n < 0:
+        return False, None
+    N = n
+
+    # Legendre quick reject
+    if not _legendre_three_square_possible(N):
         return False, None
 
-    m = n
-    while m % 4 == 0:
-        m //= 4
-    if m % 8 == 7:
-        return False, None
+    allow_zero = getattr(settings, "ALLOW_ZERO_IN_DECOMP", False)
+    cap = getattr(settings, "MAX_SOLUTIONS_SUM_OF", {}).get("3_SQUARES", 20)
 
-    results = []
-    seen = set()
-    lim = int(n ** 0.5) + 1
-    start = 0 if allow_zero else 1
+    r = isqrt(N)
 
-    for a in range(start, lim):
-        na = n - a*a
-        if na < 0:
+    # Precompute squares once
+    squares = [i * i for i in range(r + 1)]
+
+    seen = set()   # canonical (x,y,z)
+    listed = []
+
+    # Iterate z from large to small helps find solutions quickly for many N
+    z_start = r
+    z_min = 0 if allow_zero else 1
+
+    for z in range(z_start, z_min - 1, -1):
+        z2 = squares[z]
+        T = N - z2
+        if T < 0:
+            continue
+
+        # Quick modular pruning for x^2 + y^2 = T
+        # Squares mod 4 ∈ {0,1} ⇒ sums mod 4 ∈ {0,1,2}; skip T≡3 (mod 4).
+        if (T & 3) == 3:
+            continue
+        # Squares mod 8 ∈ {0,1,4} ⇒ sums mod 8 ∈ {0,1,2,4,5}; prune others.
+        mod8 = T & 7
+        if mod8 not in (0, 1, 2, 4, 5):
+            continue
+
+        # Two-pointer over squares to solve x^2 + y^2 = T
+        i = 0 if allow_zero else 1
+        j = isqrt(T)
+        if j > r:
+            j = r  # clamp
+
+        while i <= j:
+            s = squares[i] + squares[j]
+            if s == T:
+                x, y = i, j
+                if allow_zero or (x > 0 and y > 0 and z > 0):
+                    # canonicalize x<=y<=z guaranteed by loop order and i<=j, but assert anyway
+                    if x <= y <= z:
+                        tup = (x, y, z)
+                        if tup not in seen:
+                            seen.add(tup)
+                            if cap is None or len(listed) < cap:
+                                listed.append(tup)
+                            # Early exit if we reached the display cap
+                            if cap is not None and len(listed) >= cap:
+                                break
+                # Move both pointers to find other pairs
+                i += 1
+                j -= 1
+            elif s < T:
+                i += 1
+            else:
+                j -= 1
+
+        if cap is not None and len(listed) >= cap:
             break
-        for b in range(a, lim):
-            nb = na - b*b
-            if nb < 0:
-                break
-            c2 = nb
-            c = int(c2 ** 0.5)
-            if c < b:
-                continue
-            if c*c == c2:
-                if not allow_zero and (a == 0 or b == 0 or c == 0):
-                    continue
-                tup = (a, b, c)
-                if tup not in seen:
-                    seen.add(tup)
-                    results.append(tup)
-                if max_decomps is not None and len(results) >= max_decomps:
-                    break
-        if max_decomps is not None and len(results) >= max_decomps:
-            break
 
-    if results:
-        details = f"{n} = " + "; ".join(
-            f"{a}² + {b}² + {c}²" for (a, b, c) in results
-        )
-        return True, details
-    else:
+    if not seen:
         return False, None
+
+    header = f"found {len(seen)}"
+    if cap is not None and len(listed) < len(seen):
+        header += f" (showing first {len(listed)})"
+
+    tail = "; ".join(f"{x}²+{y}²+{z}²" for (x, y, z) in listed)
+    details = f"{header}: {tail}" if listed else header
+    return True, details
 
 
 @classifier(

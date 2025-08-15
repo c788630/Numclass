@@ -11,6 +11,61 @@ CATEGORY = "Mathematical Curiosities"
 
 
 @classifier(
+    label="Additive sequence",
+    description="Digits can be split into a1, a2, … with a_{k+1} = a_k + a_{k-1}.",
+    oeis=None,
+    category=CATEGORY,
+)
+def is_additive_sequence(n: int):
+    """
+    Returns (True, "n = a1, a2, ...") if the base-10 digits of |n|
+    can be split into an additive sequence:
+        each term after the first two equals the sum of the previous two.
+    Rules:
+      - At least three terms overall.
+      - No leading zeros in any multi-digit term (but the digit '0' itself is allowed).
+    """
+    s = str(abs(n))
+    L = len(s)
+    if L < 3:
+        return False, None
+
+    # If the number starts with '0', the first term can only be '0'
+    # (any longer first term would have a leading zero and is invalid).
+    first_len_range = range(1, L - 1) if s[0] != "0" else range(1, 2)
+
+    for i in first_len_range:  # length of first term
+        a_str = s[:i]
+        # For the second term, avoid leading zeros in multi-digit pieces
+        for j in range(1, L - i):  # length of second term
+            b_str = s[i:i + j]
+            if (a_str[0] == "0" and len(a_str) > 1) or (b_str[0] == "0" and len(b_str) > 1):
+                continue
+
+            # Build the sequence greedily
+            seq = [int(a_str), int(b_str)]
+            k = i + j  # index into s where the next term should start
+
+            while k < L:
+                c = seq[-1] + seq[-2]
+                c_str = str(c)
+                if not s.startswith(c_str, k):
+                    break
+                seq.append(c)
+                k += len(c_str)
+
+            # Success if we consumed all digits and have >= 3 terms
+            if k == L and len(seq) >= 3:
+                # Build "a+b=c" steps from term3 onward
+                steps = [f"{seq[t-2]}+{seq[t-1]}={seq[t]}" for t in range(2, len(seq))]
+                # If you want to cap very long outputs, set a MAX_STEPS and slice here
+                details = f"{int(s)}: " + ", ".join(steps)
+                return True, details
+
+    return False, None
+
+
+@classifier(
     label="Binary-interpretable number",
     description="Number can be interpreted as a binary numeral.",
     category=CATEGORY

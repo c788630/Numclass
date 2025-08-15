@@ -92,7 +92,7 @@ def _is_fermat_pseudoprime(n: int, bases=BASES):
 
 
 @classifier(
-    label="Euler–Jacobi pseudoprime",
+    label="Euler-Jacobi pseudoprime",
     description="Composite n where a^((n-1)//2) ≡ Jacobi(a,n) mod n for at least one base in {2,3,5,7,11,13}.",
     oeis="A047713",
     category=CATEGORY
