@@ -10,11 +10,11 @@
   - Möbius μ(n)
   - Radical rad(n)
 - Total solutions display for `is_sum_of_2_squares`
-- More known solutions for `sum_of_3_cubes`
+- More known solutions for `is_sum_of_3_cubes`
 - New classifier (curiosities): Additive sequence
 
 ### Updated
-- `sum_of_3_squares` and `sum_of_2_cubes` now show number of found solutions
+- `is_sum_of_3_squares` and `is_sum_of_2_cubes` now show number of found solutions
 
 ### Fixed
 - Line wrapping for Euler’s totient and Carmichael in Number statistics
