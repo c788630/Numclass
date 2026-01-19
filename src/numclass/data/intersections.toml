@@ -1,0 +1,211 @@
+# =============================================================================
+# intersections.toml -- User-customizable intersection rules for numclass
+#
+# Define "intersection" classifications where a number meeting several atomic
+# classes is given a combined label.
+#
+# HOW TO USE:
+#   - Add one [[intersections]] table per rule.
+#   - of = array of atomic display labels (must match classifier labels)
+#   - label = the resulting intersection display label (should be unique)
+#   - Order does not matter; code prefers longer (more specific) intersections.
+#
+# NOTE:
+#   - Remove or comment rules to disable them.
+#   - Restart numclass to reload changes.
+#
+# Intersection exceptions are: Motzkin prime, Catalan prime and Keith prime,
+# because their prime classifiers (lookup) are much faster.
+# =============================================================================
+
+[[intersections]]
+of = ["Prime number", "Automorphic number"]
+label = "Automorphic prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime whose square ends with the number itself (n >= 0)."
+oeis = "A052228"
+
+[[intersections]]
+of = ["Prime number", "Bell number"]
+label = "Bell prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime that divides a Bell number (which counts set partitions)."
+oeis = "A051130"
+
+[[intersections]]
+of = ["Prime number", "Brazilian number"]
+label = "Brazilian prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime representable as a repdigit in some base b with 2 <= b <= n - 2."
+oeis = "A377886"
+
+[[intersections]]
+of = ["Prime number", "Cullen number"]
+label = "Cullen prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime p = k*2^k + 1 for some integer k >= 1."
+oeis = "A050920"
+
+[[intersections]]
+of = ["Prime number", "Cyclops number"]
+label = "Cyclops prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime with an odd number of digits and a single zero in the center."
+oeis = "A134809"
+
+[[intersections]]
+of = ["Prime number", "Disarium number"]
+label = "Disarium prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime equal to the sum of its digits each raised to its positional power."
+# oeis intentionally omitted (none)
+
+[[intersections]]
+of = ["Prime number", "Factorion"]
+label = "Factorion prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime equal to the sum of factorials of its digits."
+# oeis intentionally omitted
+
+[[intersections]]
+of = ["Prime number", "Fibonacci number"]
+label = "Fibonacci prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime term of the Fibonacci sequence (F0=0, F1=1, Fn=F(n-1)+F(n-2))."
+oeis = "A005478"
+
+[[intersections]]
+of = ["Prime number", "Happy number"]
+label = "Happy prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime where summing squares of digits repeatedly reaches 1."
+oeis = "A035497"
+
+[[intersections]]
+of = ["Prime number", "Harshad number"]
+label = "Harshad prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime divisible by the sum of its digits."
+# oeis intentionally omitted
+
+[[intersections]]
+of = ["Prime number", "Lucas number"]
+label = "Lucas prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime term of the Lucas sequence (L0=2, L1=1, Ln=L(n-1)+L(n-2))."
+oeis = "A005479"
+
+[[intersections]]
+of = ["Prime number", "Lucky number"]
+label = "Lucky prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime that is also a lucky number (from the lucky sieve)."
+oeis = "A031157"
+
+[[intersections]]
+of = ["Prime number", "Mersenne number"]
+label = "Mersenne prime"
+category = "Primes and Prime-related Numbers"
+description = "A prime number of the form 2^p − 1."
+oeis = "A000043"
+
+[[intersections]]
+of = ["Prime number", "Narcissistic number"]
+label = "Narcissistic prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime that is also a narcissistic (Armstrong) number: n = sum of digits^d, where d = digit count."
+oeis = "A145380"
+
+[[intersections]]
+of = ["Prime number", "Padovan number"]
+label = "Padovan prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime term of the Padovan sequence (P0=P1=P2=1; Pn=P(n-2)+P(n-3))."
+oeis = "A100891"
+
+[[intersections]]
+of = ["Prime number", "Palindrome"]
+label = "Palindromic prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime that reads the same forwards and backwards."
+oeis = "A002385"
+
+[[intersections]]
+of = ["Prime number", "Pell number"]
+label = "Pell prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime term of the Pell sequence (P0=0, P1=1, Pn=2*P(n-1)+P(n-2))."
+oeis = "A096650"
+
+[[intersections]]
+of = ["Prime number", "Repunit"]
+label = "Repunit prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime composed only of digit '1'."
+oeis = "A004022"
+
+[[intersections]]
+of = ["Prime number", "Smarandache-Wellin number"]
+label = "Smarandache-Wellin prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime formed by concatenating the first n primes."
+oeis = "A069151"
+
+[[intersections]]
+of = ["Prime number", "Triangular number"]
+label = "Triangular prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime p = k*(k+1)/2 for some integer k."
+# oeis intentionally omitted
+
+[[intersections]]
+of = ["Prime number", "Ulam number"]
+label = "Ulam prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime in the Ulam sequence: each term is the smallest uniquely representable sum of two distinct earlier terms."
+oeis = "A068820"
+
+[[intersections]]
+of = ["Prime number", "Woodall number"]
+label = "Woodall prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime p = k*2^k - 1 for some integer k >= 1."
+
+# Non-prime intersections
+
+[[intersections]]
+of = ["Palindrome", "Harshad number"]
+label = "Palindromic Harshad number"
+category = "Digit-based"
+description = "Number that is divisible by the sum of its digits and is a palindrome."
+oeis = "A082232"
+
+[[intersections]]
+of = ["Triangular number", "Palindrome"]
+label = "Palindromic triangular number"
+category = "Polygonal and Figurate Numbers"
+description = "Triangular number n = k*(k+1)/2 that is also a palindrome."
+oeis = "A003098"
+
+[[intersections]]
+of = ["Hexagonal number", "Harshad number"]
+label = "Harshad hexagonal number"
+category = "Polygonal and Figurate Numbers"
+description = "Hexagonal number that is divisible by the sum of its digits."
+# oeis intentionally omitted
+
+[[intersections]]
+of = ["Triangular number", "Harshad number"]
+label = "Harshad triangular number"
+category = "Polygonal and Figurate Numbers"
+description = "Triangular number divisible by the sum of its digits."
+oeis = "A076713"
+
+# Triple intersections
+
+[[intersections]]
+of = ["Prime number", "Happy number", "Palindrome"]
+label = "Happy palindromic prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime that is a palindrome and is happy (digit-square sums reach 1)."
+oeis = "A364479"

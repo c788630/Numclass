@@ -1,0 +1,101 @@
+# lean.toml
+[_PROFILE_]
+name = "lean"
+description = "Ultra-fast minimal profile: headline classifiers only, terse output, strict caps."
+
+[CATEGORIES]
+"Arithmetic and Divisor-based"           = true
+"Combinatorial and Geometric"            = false
+"Conjectures and Equation-based"         = false
+"Digit-based"                            = false
+"Diophantine Representations"            = true
+"Dynamical Sequences"                    = false
+"Fun numbers"                            = false
+"Mathematical Curiosities"               = false
+"Named Sequences"                        = false
+"Polygonal and Figurate Numbers"         = false
+"Primes and Prime-related Numbers"         = true
+"Pseudoprimes and Cryptographic Numbers" = true
+
+# For Classifiers use the classifier label name in uppercase,
+# replace (subsequent) non-alphanumerics by _
+# Example: label "collatz (3N+1) sequence" becomes "COLLATZ_3N_1_SEQUENCE"
+
+[INCLUDE_EXCLUDE]
+POLITE_NUMBER                   = false
+ULAM_NUMBER                     = false
+
+[BEHAVIOUR]
+FAST_MODE                       = true
+MAX_DIGITS                      = 100_000
+
+[FACTORING]
+BITLEN_CAP                      = 10_000_000
+DIGIT_CAP                       = 5_000
+MAX_TIME_S                      = 5.0
+SMALL_DIGIT_THRESHOLD           = 80
+STEP_LIMITS                     = [1000, 10_000, 100_000, 1_000_000]
+USE_ECM                         = true
+
+[DISPLAY_SETTINGS]
+DIVISOR_PRINT_LIMIT             = 250
+REPEATING_DEC_PRINT_LIMIT       = 20
+SEQUENCE_PRINT_LIMIT            = 500
+SHOW_ALIQUOT_PROGRESS           = false
+SHOW_ALIQUOT_SEQUENCE           = true
+SHOW_ALIQUOT_TIME               = false
+SHOW_CLASSIFIER_DETAILS         = false
+SHOW_COLLATZ_PEAK               = "Full"  # or "Shortened" | "None"
+SHOW_DIGITAL_ROOT_SEQ           = false
+SHOW_DIVISOR_STATS              = false
+SHOW_DIVISORS                   = true
+SHOW_MULTIPLICATIVE_SEQ         = false
+SHOW_QUASI_ALIQUOT_SEQUENCE     = true
+SHOW_REPEATING_DEC_COUNT        = true
+SHOW_SKIPPED                    = true
+SHOW_UNITARY_ALIQUOT_SEQUENCE   = false
+
+[FORMATTING]
+ELLIPSIS                        = "…"
+ELLIPSIS_SPLIT                  = "•••"
+NUM_ABBR_ENABLED                = true
+NUM_ABBR_HEAD                   = 10
+NUM_ABBR_TAIL                   = 10
+NUM_ABBR_THRESHOLD              = 10
+# "paren" | "overline" | "underline"
+REPEATING_DEC_STYLE             = "underline" 
+REPEATING_DEC_MIN_REP_SHOWN     = 20
+SEQUENCE_ARROW                  = " → "
+UNITFRAC_MAX_REDUCED            = 1_000_000
+
+[OUTPUT]
+# Examples:
+# OUTPUT_FILE = ""              # No output file
+# OUTPUT_FILE = "."             # Write ./<n>.txt
+# OUTPUT_FILE = "results/"      # Write results/<n>.txt
+# OUTPUT_FILE = "log.txt"       # Append all to a single file
+OUTPUT_FILE = "" 
+
+# ============================================================
+# Settings used by multiple classifiers and classifier helpers
+# ============================================================
+
+[ALIQUOT]
+MAX_STEPS              = 250
+STEP_TIME_LIMIT        = 0.30
+STATS_MAX_TIME_S       = 0.5
+STATS_MAX_PEAK_DIGITS  = 2000
+STATS_MAX_START_DIGITS = 60
+VALUE_LIMIT            = 100_000_000_000 # Classifiers only
+
+[DIOPHANTINE]
+# remove or comment a key to set "unlimited"
+ALLOW_ZERO_IN_DECOMP          = false # if false, excludes any result with a==0 or b==0.
+MAX_ABS_FOR_SUM_OF_3_CUBES    = 150
+MIN_PALINDROME_DIGITS         = 2
+MAX_SOL_SUM_OF_2_CUBES        = 20
+MAX_SOL_SUM_OF_2_PALINDROMES  = 20
+MAX_SOL_SUM_OF_2_SQUARES      = 20
+MAX_SOL_SUM_OF_3_CUBES        = 20
+MAX_SOL_SUM_OF_3_PALINDROMES  = 20
+MAX_SOL_SUM_OF_3_SQUARES      = 20

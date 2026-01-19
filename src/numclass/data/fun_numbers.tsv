@@ -1,0 +1,152 @@
+# This file contains fun numbers famous in sci-fi, internet memes, pop culture, geek subcultures and computing, used by the fun_number classifier.
+# Add, edit, or remove entries as you like!
+# format: n<TAB>description (comments start with #)
+
+-1	Largest negative integer.
+0	Zero; cardinality of the empty set; the additive identity; was represented using a shell in the ancient Mayan civilisation.
+3	Number of dimensions we can see; number of particles generations in the standard model; first Mersenne prime.
+5	Number of Platonic solids; number of vertices of a pyramid; number of vertices in the smallest non-planar (K5); the cycle of fifths underlies to musical harmonies; fifth Fibonacci number.
+7	Considered a lucky or sacred number in many cultures and religions, often exaggerated in memes and fiction. '7 of 9' is a Star Trek: Voyager character (not literal, but often referenced numerically).
+13	13—unlucky, also the number of colonies in Battlestar Galactica.
+14	Sum of the first three squares, i.e. a square-pyramidal number; open meandric number: the number of meanders in non-self-intersecting oriented curves; number of pounds in one stone; fourth Catalan number.
+15	Magic constant in a 3×3 magic square; largest composite number with one group of that order; triangular, hexagonal, pentatope and Bell number.
+16	Only number of the form x y=y x with x and y distinct integers; number of pawns in a chess set, and each player starts with 16 pieces; length of credit card numbers.
+18	Only non-zero number that is twice the sum of its digits; sum of the first three pentagonal numbers, making it a “pentagonal pyramidal number”; lucky number and the value for life in Jewish numerology.
+19	Maximum number of 4th powers needed to sum to any number; number of cells in the only non-trivial magic hexagon.
+20	Number of rooted trees with 6 vertices; number of faces of an icosahedron and vertices of a dodecahedron; number of quarter or half turns required to optimally solve a Rubik’s cube in the worst case; base of the ancient Mayan number system; sum of the first 4 triangular numbers, and thus a tetrahedral number.
+21	Magic number in Blackjack; number of dots on a 6-sided die; smallest number of distinct squares into which a square can be dissected; smallest Fibonacci number whose digits and digit sums are also Fibonacci.
+22	Number of partitions of 8; number of Major Arcana cards in divinatory Tarot; pentagonal and a centred heptagonal number.
+23	23 enigma (Illuminatus! Trilogy, Lost, pop culture mysticism).
+24	Largest number divisible by all integers less than its square root; only non-trivial integer n with the property that 1 2+…+n 2 is a perfect square; number of hours in a day.
+32	Smallest nontrivial fifth power; 32=1 1+2 2+3 3; sum of the totient functions of the first ten integers; freezing point of water at sea level in Fahrenheit.
+33	Largest integer that isn’t the sum of distinct triangular numbers; number of vertebrae in a human spine; sum of the first four factorials.
+34	Smallest number that has the same number of divisors as the previous and following number; magic number of the order four magic square; nontotient and noncototient number.
+35	Number of different hexominoes; sum of the first five triangular numbers; highly cototient and tetrahedral number.
+36	Smallest non-trivial number which is both square and triangular; sum of the cubes of the first three integers; the sum of the first 36 integers is 666.
+37	Maximum number of 5th powers needed to sum to any number; lucky, irregular, unique and cuban prime; human body temperature in degrees Celsius; number of plays written by Shakespeare.
+38	Magic number of an order 3 magic hexagon; number of slots in American Roulette; largest even number which cannot be written as the sum of two odd composite numbers.
+39	Sum of five consecutive primes: 3 + 5 + 7 + 11 + 13; sum the first three powers of three: 3 + 9 + 27; number of steps in the title of a Hitchcock film.
+40	Only number whose letters are in alphabetical order; Venus returns to the same point in the night sky every 40 years; octagonal number; number of days in Lent.
+41	The polynomial n^2+n+41 gives primes for n<40; lucky number of Euler, and the largest such prime; number of Mozart’s last symphony.
+42	The Answer to the Ultimate Question of Life, the Universe, and Everything (Douglas Adams, The Hitchhiker’s Guide to the Galaxy).
+43	Lowest atomic number of any element without stable isotopes; smallest prime that is not a Chen prime; smallest prime number expressible as the sum of two, three, four or five primes.
+47	Star Trek writers' in-joke: number 47 appears frequently in the franchise.
+54	Studio 54 (pop culture/celebrity hub).
+69	Pop culture meme number (humor, innuendo). Also the largest factorial that fit calculators with 2-digit exponent: 70! ≈ 1.198×10^100: overflowed.
+73	“The best number” (Sheldon, Big Bang Theory): 21st prime; 7×3=21, and 12 reversed is 21.
+75	V.23/Minitel upstream serial baudrate (the famous 1200/75 split).
+88	88 miles per hour—the speed needed for time travel (Back to the Future).
+94	Number of graphic non-whitespace characters in ASCII; smith number, since the sum of its digits equals the sum of its prime factors; 94! – 1 is prime.
+98	The decimal expansion of its reciprocal starts with the powers of two: 1/98=0.010204081632….
+99	Agent 99 (Get Smart, classic spy comedy).
+100	Boiling point of water in Celsius; denoted by the letter C in Roman numerals; sum of the first four cubes: 100=1^3+2^3+3^3+4^3.
+101	Room 101 (Orwell's 1984); also 'Intro 101' as a code for basics in US education.
+108	Number of heptominoes (one of which contains a whole); sacred number in the Dharmic Religions.
+110	Teletype/ASR-33 era terminal baudrate; classic vintage UNIX console speed.
+111	Magic constant of the smallest magic square composed only of prime numbers and 1; magic constant of a 6×6 magic square.
+112	The emergency telephone number throughout the European Union and many other countries worldwide; equivalent to 911 in the US/Canada.
+113	A113 was the Pixar animation classroom at the California Institute of the Arts.
+118	Smallest number which can be written as the sum of three integers in four different ways, so that the product of every triple is the same
+128	Smallest number that is the product of 7 prime factors (2 7); largest number that is not the sum of distinct squares; power of 2, all of whose digits are powers of 2
+132	Smallest number that is the sum of all 2-digit numbers made from its digits; sixth Catalan number
+137	Fine-structure constant — numerology or nature’s favorite number?
+153	Sum of the cubes of its integers: 153=1 3+5 3+3 3; sum of the first 5 factorials and the first 17 natural numbers.
+212	The boiling point of water in Fahrenheit.
+221	221B Baker Street (Sherlock Holmes, referenced in Doctor Who and elsewhere).
+255	largest number that can be represented using an 8-bit unsigned integer
+300	Bell 103 acoustic-coupler modem baudrate—early BBS/‘WarGames’ dial-up vibes.
+314	Pi (3.14), beloved in science/math pop culture.
+327	Docking Bay 327 in Star Wars: A New Hope (Millennium Falcon arrival).
+404	A common meme for 'not found' errors or missing content.
+420	Internet meme and counterculture reference (esp. 4:20 PM as 'weed time').
+451	the title of 'Fahrenheit 451', Ray Bradbury’s novel, named for the temperature at which book paper ignites.
+666	The Number of the Beast: a beastly (or hateful) number from the Bible (Revelation), popular in pop culture, heavy metal, horror, and edgy memes.
+911	The emergency telephone number in the US, Canada and several other countries; also associated with the September 11, 2001 terrorist attacks in the US.
+1138	THX 1138 (George Lucas's first feature film and recurring Star Wars/Lucasfilm Easter egg).
+1200	Hayes Smartmodem baudrate; golden-age BBS calling with AT commands.
+1337	'Leet' speak for 'elite', iconic in hacker/gamer culture.
+1701	NCC-1701—registry number of the Starship Enterprise (Star Trek).
+1984	Nineteen Eighty-Four, classic dystopian novel (George Orwell).
+2001	2001 is the year featured in '2001: A Space Odyssey' by Arthur C. Clarke and Stanley Kubrick.
+2112	Rush concept album (sci-fi dystopia, cult favorite in geek culture).
+2187	Leia's cell number in Star Wars: A New Hope (cell 2187); also an homage to experimental film '21-87'
+2240	Number of pounds in an (English) ton.
+2310	Smallest number with 5 different prime factors.
+2400	Dial-up modem/BBS baudrate from the late ’80s file-swap era.
+2592	Equals 2^5×9^2 and is the only number with such a pattern.
+3003	Smallest number to appear 8 times in Pascal’s triangle (there is no other number less than 2^23 appearing 8 times).
+3141	The first four digits of pi (π = 3.141...) — math and pop culture symbol.
+3600	Number of seconds in one hour.
+3999	Largest number that can be written in Roman numerals, as MMMCMXCIX.
+4004	Intel 4004 — first commercially available microprocessor (1971).
+4096	Classic 4k demoscene size limit (and 2¹²).
+4800	GPS NMEA-0183 default serial baudrate (marine/nav gear staple).
+4900	The only square pyramidal number that is also a square: 4900=70^2=1^2+2^2+3^2+…+24^2
+5040	Mentioned by Plato as the ideal number of people living in a city, due to its high number of factors.
+5913	Sum of the first 7 factorials: 5913 = 1! + 2! + 3! + … + 6! + 7!.
+6502	MOS 6502 CPU (Apple II, Commodore, Atari) — iconic 8-bit era processor.
+6510	MOS 6510 CPU (Commodore 64).
+8000	equals 20^3, but is also the sum of four consecutive cubes: 11^3+12^3+13^3+14^3.
+8086	Intel 8086 CPU (x86 lineage begins here).
+9000	HAL 9000, sentient computer (2001: A Space Odyssey).
+9001	It's Over 9000!—internet meme from Dragon Ball Z.
+9600	Canonical serial console baudrate—‘9600 8N1’ everywhere (routers, printers, dev boards).
+9694	Number of hypercube unfoldings in 5D.
+12758	Largest number that cannot be represented as the sum of distinct cubes.
+13312	“PETSCII block” memory page nostalgia; 13,312 bytes free on some Commodore BASIC screens.
+13337	A Leet number: 'a Leeter' (playful extension of leet).
+14400	V.32bis modem/fax baudrate—‘14.4’ stuck in dial-up lore.
+17163	Largest number that is not the sum of the squares of distinct primes.
+19200	Common post-BBS serial console baudrate in industrial/embedded gear.
+24601	Jean Valjean's prisoner number (Les Misérables); geek culture references.
+26830	Number of possible Tic-tac-toe games.
+31250	MIDI protocol baudrate since 1983 (synths, drum machines, keyboards).
+31337	A Leet number: 'Eleet' or 'elite'; highly regarded in old-school hacker circles.
+38911	Commodore 64 Basic Bytes Free.
+32767	The maximum value for a signed 16-bit integer (2¹⁵–1); often seen as a classic data limit (e.g., MIDI, audio, legacy software).
+32768	2¹⁵ (midpoint of 16-bit range) — powers-of-two lore in computing.
+-32768	The minimum value for a signed 16-bit integer (–2¹⁵); underflows/overflows in legacy software and hardware.
+38400	Classic UNIX/Linux/BSD serial console baudrate.
+40755	First number, other than 1, that is simultaneously triangular, pentagonal and hexagonal.
+56000	‘56K modem’ marketing-era baudrate (V.90/V.92 nostalgia).
+57600	Faster embedded/serial console baudrate; a stepping stone to 115200.
+65535	The maximum value for an unsigned 16-bit integer (2¹⁶–1); common as the highest port number (TCP/UDP), color depth, and memory limits in classic computing.
+65536	2¹⁶ — classic 16-bit boundary.
+68000	Motorola 68000 CPU (Amiga, Atari ST, Macintosh).
+74656	Registry of USS Voyager (Star Trek: Voyager).
+74880	ESP8266 boot ROM debug-log baudrate—quirky but famous in maker circles.
+80085	A calculator gag spelling of “BOOBS” upside-down.
+115200	Ubiquitous modern UART/USB-serial baudrate—Arduino/ESP/boot logs ‘hello world’.
+123456	A joke about weak passwords.
+144000	The Number of the Chosen: Sacred number, Iconic symbolic number appearing in cultural & religious contexts.
+230400	High-speed UART baudrate for faster flashing and logs.
+250000	Arduino/Marlin 3D-printer friendly baudrate (nice timer divisors on AVR).
+271828	First six digits of e — math/CS meme adjacent.
+314159	First six digits of π — nerd culture shorthand.
+460800	Very-high UART/debug baudrate used in performance-hungry pipelines.
+921600	Near-megabaud UART baudrate—common for fast firmware flashing.
+1000000	Round 1M UART baudrate used by bootloaders and microcontrollers.
+1048576	Mebibyte: 2^20; represents 1 MiB; fundamental computing threshold.
+5318008	A calculator gag spelling "BOOBIES" upside-down.
+8675309	Jenny's phone number (Tommy Tutone, iconic in pop culture).
+13371337	A Leet number: 'Double leet'; playful combination of leet digits.
+16777215	The maximum value for a 24-bit integer (2²⁴–1); classic color value in true color (24-bit, 16.7 million colors: #FFFFFF).
+133769420	A Leet giggle; it combines meme numbers 1337, 69, and 420.
+299792458	Speed of light in vacuum reached. All further classifiers are relativistic.
+1234567890	UNIX time for 13 Feb 2009 23:31:30 GMT (computer/geek humor).
+2147483647	The maximum value for a signed 32-bit integer; the largest representable Unix time (seconds since Jan 1, 1970) in 32-bit systems. Will cause the 'Year 2038 problem' or 'Unix Millennium Bug' when the counter overflows.
+2642657228	Number of hypercube unfoldings in 8D.
+4294967295	The maximum value for an unsigned 32-bit integer (2³²–1); appears in programming, file size limits, IP address space (255.255.255.255), and more.
+158753389900	The probability of receiving a complete suit in the game of Bridge.
+244432188000	The number of different Catan boardgames you can play.
+248639631948	Number of hypercube unfoldings in 9D.
+281474976710655	The maximum value for a 48-bit integer (2⁴⁸–1); used in MAC addresses and classic computing boundaries.
+18446744073709551615	The maximum value for an unsigned 64-bit integer (2⁶⁴–1); 'all bits set' in 64-bit computing. The number of grains of rice required if you place one grain on the first square of a chess board, two on the second, 4 on the third, 8 on the fourth, and so on.
+42391158275216203514294433201	Googor, named large number for 3^60.
+1267650600228229401496703205376	Googolith, named large number for 2^100.
+10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000	Googol, named large number for 10^100.
+56347514353166785389812313795980500551139163800306781874894667776000000000000000000000000000000000000000000000000000000000000	Googolex, named large number for 120^60.
+13407807929942597099574024998205846127479365820592393377723561443721764030073546976801874298166903427690031858186486050853753882811946569946433649006084096	Megiston, named large number for 2^512
+126765060022822940149670320537600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000	Googoc, named large number for 200^100.
+1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000	Googol-cube, named large number for 10^300.
+1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000	Megiston, named large number for 10^303.

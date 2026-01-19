@@ -1,0 +1,165 @@
+#default.toml
+
+[_PROFILE_]
+name = "default"
+description = "Balanced everyday setup: broad coverage, safe caps, informative details."
+
+[CATEGORIES]
+"Arithmetic and Divisor-based"           = true
+"Combinatorial and Geometric"            = true
+"Conjectures and Equation-based"         = false
+"Digit-based"                            = true
+"Diophantine Representations"            = true
+"Dynamical Sequences"                    = false
+"Fun numbers"                            = true
+"Mathematical Curiosities"               = true
+"Named Sequences"                        = true
+"Polygonal and Figurate Numbers"         = true
+"Primes and Prime-related Numbers"       = true
+"Pseudoprimes and Cryptographic Numbers" = true
+
+[INCLUDE_EXCLUDE]
+# For Classifiers use the classifier label name in uppercase,
+# replace (subsequent) non-alphanumerics by _
+# Example: label "collatz (3N+1) sequence" becomes "COLLATZ_3N_1_SEQUENCE"
+# Specifying multiple classifiers true will include those and exclude the others (whitelisted)
+# Specifying multiple classifiers false will exclude those and include the others (blacklisted)
+# If no classifiers are specified, all are included (whitelisted)
+POLITE_NUMBER                   = false
+RAMSEY_NUMBER_2_COLOUR_EXACT    = false
+SCHUR_NUMBER                    = false
+SUM_OF_3_PALINDROMES            = false
+VAN_DER_WAERDEN_NUMBER_EXACT    = false
+
+[BEHAVIOUR]
+FAST_MODE                       = true
+MAX_DIGITS                      = 100_000
+
+[FACTORING]
+BITLEN_CAP                      = 10_000_000
+DIGIT_CAP                       = 5_000
+MAX_TIME_S                      = 5.0
+SMALL_DIGIT_THRESHOLD           = 80
+STEP_LIMITS                     = [1000, 10_000, 100_000, 1_000_000]
+USE_ECM                         = true
+
+[DISPLAY_SETTINGS]
+DIVISOR_PRINT_LIMIT             = 100
+REPEATING_DEC_PRINT_LIMIT       = 30
+SEQUENCE_PRINT_LIMIT            = 200
+SKIPPED_MAX_LINES               = 10
+SHOW_ALIQUOT_PROGRESS           = true
+SHOW_ALIQUOT_SEQUENCE           = true
+SHOW_ALIQUOT_TIME               = true
+SHOW_CLASSIFIER_DETAILS         = true
+SHOW_COLLATZ_PEAK               = "Full"  # or "Shortened" | "None"
+SHOW_DIGITAL_ROOT_SEQ           = true
+SHOW_DIVISOR_STATS              = true
+SHOW_DIVISORS                   = true
+SHOW_MULTIPLICATIVE_SEQ         = true
+SHOW_QUASI_ALIQUOT_SEQUENCE     = true
+SHOW_REPEATING_DEC_COUNT        = true
+SHOW_SKIPPED                    = true
+SHOW_UNITARY_ALIQUOT_SEQUENCE   = false
+
+[FORMATTING]
+ELLIPSIS                        = "…"
+ELLIPSIS_SPLIT                  = "•••"
+NUM_ABBR_ENABLED                = true
+NUM_ABBR_HEAD                   = 10
+NUM_ABBR_TAIL                   = 10
+NUM_ABBR_THRESHOLD              = 10
+SEQUENCE_ARROW                  = " → "
+REPEATING_DEC_STYLE             = "underline"
+REPEATING_DEC_MIN_REP_SHOWN     = 30
+UNITFRAC_MAX_REDUCED            = 1_000_000
+
+[OUTPUT]
+# Examples:
+OUTPUT_FILE = ""                # No output file
+# OUTPUT_FILE = "."             # Write ./<n>.txt
+# OUTPUT_FILE = "results/"      # Write results/<n>.txt
+# OUTPUT_FILE = "log.txt"       # Append all to a single file
+
+# ============================================================
+# Settings used by multiple classifiers and classifier helpers
+# ============================================================
+
+[ALIQUOT]
+MAX_STEPS              = 250
+STEP_TIME_LIMIT        = 0.30
+STATS_MAX_TIME_S       = 0.5
+STATS_MAX_PEAK_DIGITS  = 2000
+STATS_MAX_START_DIGITS = 60
+VALUE_LIMIT            = 100_000_000_000 # Classifiers only
+
+[COMBINATORIAL]
+TIME_BUDGET_S          = 0.1
+
+[DIOPHANTINE]
+# remove or comment a key to set "unlimited"
+ALLOW_ZERO_IN_DECOMP          = false # if false, excludes any result with a==0 or b==0.
+MAX_ABS_FOR_SUM_OF_3_CUBES    = 150
+MIN_PALINDROME_DIGITS         = 2
+MAX_SOL_SUM_OF_2_CUBES        = 20
+MAX_SOL_SUM_OF_2_PALINDROMES  = 20
+MAX_SOL_SUM_OF_2_SQUARES      = 20
+MAX_SOL_SUM_OF_3_CUBES        = 20
+MAX_SOL_SUM_OF_3_PALINDROMES  = 20
+
+# ==========================
+# Unique classifier settings
+# ==========================
+
+[CLASSIFIER.BELL]
+# from is_bell_number in combinatorial_geometric.py
+MAX_K                  = 2_500
+
+[CLASSIFIER.CATALAN]
+# from is_catalan_number in combinatorial_geometric.py
+MAX_K                  = 200_000
+
+[CLASSIFIER.GOLDBACH]
+# from is_goldbach_sum_of_two_primes in conjectures.py
+MAX_LIST               = 300         # default 5
+PROBE_CAP              = 500_000     # default 500_000
+SHOW_ALL               = true        # default false
+SHOW_COUNT             = true        # default true        - Show how many p to try in quick path
+SIEVE_MAXN             = 10_000_000  # default 10_000_000  - Absolute cap for sieve use
+
+[CLASSIFIER.GRAFTING]
+# from is_grafting_number in digit_based.py
+ALLOW_STRADDLE         = true
+EARLY_STOP_ZEROS       = 2
+GUARD_EXTRA_DIGITS     = 8
+HARD_MAX_ORDER         = 12
+MAX_DIGITS             = 200
+MAX_ORDER              = 6
+SIDE                   = "either"
+
+[CLASSIFIER.K_FULL]
+# from is_k_full in arithmetic_divisor.py
+K_VALUE                = 4           # default 4           - Minimal exponent required in the prime factorisation
+
+[CLASSIFIER.LAH]
+# from is_lah_number in combinatorial_geometric.py
+MAX_INDEX              = 10_000
+
+[CLASSIFIER.MOTZKIN]
+# from is_motzkin_number in combinatorial_geometric.py
+MAX_K                  = 200_000
+
+[CLASSIFIER.PRIMORIAL]
+MAX_DIGITS             = 200
+MAX_PRIMES             = 5000
+
+[CLASSIFIER.ULAM]
+# from is_ulam_number in named_sequences.py
+TIME_BUDGET_S          = 0.5
+
+[CLASSIFIER.ZUMKELLER]
+# from is_zumkeller in arithmetic_divisor.py
+BITSET_TARGET_CAP      = 10_000_000
+DIVISOR_LIMIT          = 5000
+SMALL_TAU_MITM         = 32
+WITNESS_TARGET_CAP     = 200_000

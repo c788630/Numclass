@@ -1,0 +1,47 @@
+# This file defines special inputs that alter program execution (control flow)
+# Format: key<TAB>handler<TAB>index<TAB>description<TAB>digits<TAB>extra (comments start with #)
+
+2**756839-1	mersenne_exact	32	Mersenne prime M32 2^756839-1, discovered in 1992 by D Slowinski and P Gage	227832	
+2**859433-1	mersenne_exact	33	Mersenne prime M33 2^859433-1, discovered in 1994 by D Slowinski and P Gage	258716	
+2**1257787-1	mersenne_exact	34	Mersenne prime M34 2^1257787-1, discovered in 1996 by D Slowinski and P Gage	378632	
+2**1398269-1	mersenne_exact	35	Mersenne prime M35 2^1398269-1, discovered in 1996 by J Armengaud in collaboration (France)	420921	
+2**2976221-1	mersenne_exact	36	Mersenne prime M36 2^2976221-1, discovered in 1997 by G Spence in collaboration (UK)	895932	
+2**3021377-1	mersenne_exact	37	Mersenne prime M37 2^3021377-1, discovered in 1998 by R Clarkson in collaboration (USA)	909526	
+2**6972593-1	mersenne_exact	38	Mersenne prime M38 2^6972593-1, discovered in 1999 by N Hajratwala in collaboration (USA)	2098960	
+2**13466917-1	mersenne_exact	39	Mersenne prime M39 2^13466917-1, discovered in 2001 by M Cameron in collaboration (Canada)	4053946	
+2**20996011-1	mersenne_exact	40	Mersenne prime M40 2^20996011-1, discovered in 2003 by M Shafer in collaboration (USA)	6320430	
+2**24036583-1	mersenne_exact	41	Mersenne prime M41 2^24036583-1, discovered in 2004 by J Findley in collaboration, (USA)	7235733	
+2**25964951-1	mersenne_exact	42	Mersenne prime M42 2^25964951-1, discovered in 2005 by M Nowak in collaboration (Germany)	7816230	
+2**30402457-1	mersenne_exact	43	Mersenne prime M43 2^30402457-1, discovered in 2005 by C Cooper and S Boone using GIMPS	9152052	
+2**32582657-1	mersenne_exact	44	Mersenne prime M44 2^32582657-1, discovered in 2006 by C Cooper and S Boone using GIMPS	9808358	
+2**43112609-1	mersenne_exact	45	Mersenne prime M45 2^43112609-1, discovered in 2008 by the University of California - LA using GIMPS	12978189	
+2**37156667-1	mersenne_exact	46	Mersenne prime M46 2^37156667-1, discovered in 2008 by H-M Elvenich using GIMPS	11185272	
+2**42643801-1	mersenne_exact	47	Mersenne prime M47 2^42643801-1, discovered in 2009 by OM Strindmo using GIMPS	12837064	
+2**57885161-1	mersenne_exact	48	Mersenne prime M48 2^57885161-1, discovered in 2013 by C Cooper using GIMPS	17425170	
+2**74207281-1	mersenne_exact	49	Mersenne prime M49 2^74207281-1, discovered in 2016 by C Cooper using GIMPS	22338618	
+2**77232917-1	mersenne_exact	50	Mersenne prime M50 2^77232917-1, discovered in 2017 by J Pace, Woltman,  using GIMPS	23249425	
+2**82589933-1	mersenne_exact	51	Mersenne prime M51 2^82589933-1, discovered in 2018 by P Laroche using GIMPS	24862048	
+2**136279841-1	mersenne_exact	52	Mersenne prime M52 2^136279841-1, discovered in 2024 by L Durant using GIMPS	41024320	
+0**0	egg		0⁰ is undefined — the true neutral element of confusion.		
+about	egg		Numclass v2.0.0 — classifying the universe, one integer at a time.		
+boring	egg		Boring number? Did you mean 1911?		
+cantor	egg		Cantor says your question has been placed in a set of all questions that don’t contain themselves. Please stand by for a paradox.		
+coffee	egg		Caffeination initialized. Divisor sums may take longer.		
+e	egg		Euler's constant. Naturally exponential.		
+error	egg		the input ‘error’ caused… an error. Halting before recursion forms.		
+exit	egg		exit is not a number. Nor a classifier. Nor an escape from mathematics.		
+godel	egg		Self-reference detected. Classification undecidable.		
+hello	egg		Greetings, integer explorer.		
+inf	egg		Infinity reached. All classifiers apply and none complete. Ask Cantor.		
++inf	egg		Positive infinity — growth without bound, hubris without limit.		
+nan	egg		Not a Number — not even close.		
+numclass	egg		That's me! Recursive classification detected.		
+petaQ	egg		Klingon profanity detected. Honor = 0.		
+phi	egg		Golden ratio reached — divine proportion achieved.		
+pi	egg		Transcendent beauty detected. π ≈ 3.1415926535897932384626433832795 — irrational and proud.		
+ramanujan	egg		Srinivasa whispers: 1729 is the smallest nontrivial taxi cab number.		
+stop	egg		Stopping would violate the laws of mathematical motion. Classification must continue.		
+tohuvavohu	egg		Input is without shape or void — no valid integer formed.		
+turing	egg		Halting problem encountered. Classification aborted.		
+version	egg		Numclass v2.0.0 — classifying the universe, one integer at a time.		
+∞	egg		Mathematical nirvana reached. You are now everywhere at once.		

@@ -1,0 +1,96 @@
+# aliquot.toml
+
+[_PROFILE_]
+name = "aliquot"
+description = "Focus on aliquot theory: σ/τ stats, aliquot/quasi/unitary chains, peaks and timing."
+
+[CATEGORIES]
+"Arithmetic and Divisor-based"           = false
+"Combinatorial and Geometric"            = false
+"Conjectures and Equation-based"         = false
+"Digit-based"                            = false
+"Diophantine representations"            = false
+"Dynamical Sequences"                    = false
+"Fun numbers"                            = false
+"Mathematical Curiosities"               = false
+"Named Sequences"                        = false
+"Polygonal and Figurate Numbers"         = false
+"Primes and Prime-related Numbers"       = false
+"Pseudoprimes and Cryptographic Numbers" = false
+
+# For Classifiers use the classifier label name in uppercase,
+# replace (subsequent) non-alphanumerics by _
+# Example: label "collatz (3N+1) sequence" becomes "COLLATZ_3N_1_SEQUENCE"
+
+[CLASSIFIERS]
+
+[BEHAVIOUR]
+FAST_MODE                       = false
+MAX_DIGITS                      = 100_000
+
+[INCLUDE_EXCLUDE]
+# For Classifiers use the classifier label name in uppercase,
+# replace (subsequent) non-alphanumerics by _
+# Example: label "collatz (3N+1) sequence" becomes "COLLATZ_3N_1_SEQUENCE"
+# Specifying multiple classifiers true will include those and exclude the others (whitelisted)
+# Specifying multiple classifiers false will exclude those and include the others (blacklisted)
+# If no classifiers are specified, all are included (whitelisted)
+
+[FACTORING]
+BITLEN_CAP                      = 10_000_000
+DIGIT_CAP                       = 5000
+SMALL_DIGIT_THRESHOLD           = 100
+MAX_TIME_S                      = 2.0
+STEP_LIMITS                     = [1000, 10_000, 100_000, 1_000_000]
+USE_ECM                         = false
+
+[DISPLAY_SETTINGS]
+DIVISOR_PRINT_LIMIT             = 250
+REPEATING_DEC_PRINT_LIMIT       = 40
+SEQUENCE_PRINT_LIMIT            = 2000
+SKIPPED_MAX_LINES               = 0
+SHOW_ALIQUOT_PROGRESS           = true
+SHOW_ALIQUOT_SEQUENCE           = true
+SHOW_ALIQUOT_TIME               = true
+SHOW_CLASSIFIER_DETAILS         = true
+SHOW_COLLATZ_PEAK               = "Full"  # or "Shortened" | "None"
+SHOW_DIGITAL_ROOT_SEQ           = true
+SHOW_DIVISOR_STATS              = true
+SHOW_DIVISORS                   = true
+SHOW_MULTIPLICATIVE_SEQ         = true
+SHOW_QUASI_ALIQUOT_SEQUENCE     = true
+SHOW_REPEATING_DEC_COUNT        = true
+SHOW_SKIPPED                    = false
+SHOW_UNITARY_ALIQUOT_SEQUENCE   = true
+
+[FORMATTING]
+ELLIPSIS                        = "…"
+ELLIPSIS_SPLIT                  = "•••"
+NUM_ABBR_ENABLED                = true
+NUM_ABBR_HEAD                   = 10
+NUM_ABBR_TAIL                   = 10
+NUM_ABBR_THRESHOLD              = 10
+# "paren" | "overline" | "underline"
+REPEATING_DEC_STYLE             = "underline" 
+REPEATING_DEC_MIN_REP_SHOWN     = 20
+SEQUENCE_ARROW                  = " → "
+UNITFRAC_MAX_REDUCED            = 1_000_000
+
+[OUTPUT]
+# Examples:
+OUTPUT_FILE = ""                # No output file
+# OUTPUT_FILE = "."             # Write ./<n>.txt
+# OUTPUT_FILE = "results/"      # Write results/<n>.txt
+# OUTPUT_FILE = "log.txt"       # Append all to a single file
+
+# ============================================================
+# Settings used by multiple classifiers and classifier helpers
+# ============================================================
+
+[ALIQUOT]
+MAX_STEPS              = 2000
+STATS_MAX_TIME_S       = 0
+STATS_MAX_PEAK_DIGITS  = 0
+STATS_MAX_START_DIGITS = 0
+STEP_TIME_LIMIT        = 10.0
+VALUE_LIMIT            = 100_000_000_000  # Classifiers only
