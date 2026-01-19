@@ -12,7 +12,7 @@ from numclass.registry import classifier
 from numclass.runtime import CFG
 from numclass.utility import build_ctx, load_sum_of_three_cubes_toml
 
-CATEGORY = "Diophantine representations"
+CATEGORY = "Diophantine Representations"
 
 
 # --- helpers ---
