@@ -1,0 +1,83 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "numclass"
+version = "2.0.0"
+description = "Classify integers by number-theory properties"
+license = "CC-BY-NC-4.0"
+license-files = ["LICENSE*"]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+"sympy>=1.12",
+"colorama>=0.4.6",
+"gmpy2>=2.1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.4",
+  "ruff>=0.6.9",
+]
+
+[project.scripts]
+numclass = "numclass.cli:main" 
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+numclass = [
+  "data/*",
+  "profiles/*.toml",
+  "classifiers/*.py",
+]
+
+[tool.ruff]
+line-length = 132
+target-version = "py311"
+exclude = ["src/numclass.egg-info", "build", "dist", ".venv", ".pytest_cache"]
+
+[tool.ruff.lint]
+select = ["E","F","I","B","UP","SIM","PL","RUF"]
+ignore = [
+  "E501",
+  "UP038",
+  "RUF001","RUF002","RUF003",
+  "SIM105",
+  "PLR0911","PLR0912","PLR0915",
+]
+
+[tool.ruff.lint.pylint]
+max-args = 6
+
+[tool.ruff.lint.per-file-ignores]
+# CLI: complex dispatch/args, imports, etc.
+"src/numclass/cli.py" = [
+  "PLC0415",
+  "PLR0913",
+  "PLR0911",
+  "PLR0912",
+  "PLR0915",
+  "PLR1722",
+]
+
+# Config tables are intentionally full of literals
+"src/numclass/config.py" = [
+  "PLR2004",
+  "SIM118",
+]
+
+# Number-theory modules naturally contain many literals
+"src/numclass/classifiers/**" = ["PLR2004"]
+
+# Formatting helpers sometimes use short sentinel values
+"src/numclass/fmt.py" = ["PLR0913"]
+
+# Tests: literals are fixtures/examples by design
+"tests/**" = ["PLR2004"]

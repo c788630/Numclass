@@ -1,0 +1,244 @@
+# all.toml
+
+[_PROFILE_]
+name = "all"
+description = "Enable every category/classifier; useful for demos and maximal coverage."
+
+[CATEGORIES]
+"Arithmetic and Divisor-based"           = true
+"Combinatorial and Geometric"            = true
+"Conjectures and Equation-based"         = true
+"Digit-based"                            = true
+"Diophantine Representations"            = true
+"Dynamical Sequences"                    = true
+"Fun numbers"                            = true
+"Mathematical Curiosities"               = true
+"Named Sequences"                        = true
+"Polygonal and Figurate Numbers"         = true
+"Primes and Prime-related Numbers"       = true
+"Pseudoprimes and Cryptographic Numbers" = true
+
+[INCLUDE_EXCLUDE]
+# For Classifiers use the classifier label name in uppercase,
+# replace (subsequent) non-alphanumerics by _
+# Example: label "collatz (3N+1) sequence" becomes "COLLATZ_3N_1_SEQUENCE"
+# Specifying multiple classifiers true will include those and exclude the others (whitelisted)
+# Specifying multiple classifiers false will exclude those and include the others (blacklisted)
+# If no classifiers are specified, all are included (whitelisted)
+
+# Blacklist examples
+# POLITE_NUMBER                 = false
+# ULAM_NUMBER                   = false
+
+[BEHAVIOUR]
+FAST_MODE                       = true
+MAX_DIGITS                      = 100_000
+
+[FACTORING]
+BITLEN_CAP                      = 10_000_000
+DIGIT_CAP                       = 5_000
+MAX_TIME_S                      = 5.0
+SMALL_DIGIT_THRESHOLD           = 80
+STEP_LIMITS                     = [1000, 10_000, 100_000, 1_000_000]
+USE_ECM                         = true
+
+[DISPLAY_SETTINGS]
+DIVISOR_PRINT_LIMIT             = 250
+REPEATING_DEC_PRINT_LIMIT       = 20
+SEQUENCE_PRINT_LIMIT            = 500
+SKIPPED_MAX_LINES               = 10
+SHOW_ALIQUOT_PROGRESS           = true
+SHOW_ALIQUOT_SEQUENCE           = true
+SHOW_ALIQUOT_TIME               = true
+SHOW_CLASSIFIER_DETAILS         = true
+SHOW_COLLATZ_PEAK               = "Full"  # or "Shortened" | "None"
+SHOW_DIGITAL_ROOT_SEQ           = true
+SHOW_DIVISOR_STATS              = true
+SHOW_DIVISORS                   = true
+SHOW_MULTIPLICATIVE_SEQ         = true
+SHOW_QUASI_ALIQUOT_SEQUENCE     = true
+SHOW_REPEATING_DEC_COUNT        = true
+SHOW_SKIPPED                    = true
+SHOW_UNITARY_ALIQUOT_SEQUENCE   = true
+SHOW_ZECKENDORF                 = true
+SHOW_ZECKENDORF_BITS            = true
+ZECKENDORF_MAX_TERMS            = 20  # 0 = unlimited
+ZECKENDORF_TRUNC_PREVIEW        = true
+
+[FORMATTING]
+ELLIPSIS                        = "…"
+ELLIPSIS_SPLIT                  = "•••"
+NUM_ABBR_ENABLED                = true
+NUM_ABBR_HEAD                   = 10
+NUM_ABBR_TAIL                   = 10
+NUM_ABBR_THRESHOLD              = 10
+# "paren" | "overline" | "underline"
+REPEATING_DEC_STYLE             = "underline" 
+REPEATING_DEC_MIN_REP_SHOWN     = 20
+SEQUENCE_ARROW                  = " → "
+UNITFRAC_MAX_REDUCED            = 1_000_000
+
+[OUTPUT]
+# Examples:
+OUTPUT_FILE = ""                # No output file
+# OUTPUT_FILE = "."             # Write ./<n>.txt
+# OUTPUT_FILE = "results/"      # Write results/<n>.txt
+# OUTPUT_FILE = "log.txt"       # Append all to a single file
+
+# ============================================================
+# Settings used by multiple classifiers and classifier helpers
+# ============================================================
+
+[ALIQUOT]
+MAX_STEPS              = 250
+STATS_MAX_PEAK_DIGITS  = 2000
+STATS_MAX_START_DIGITS = 60
+STATS_MAX_TIME_S       = 0.5
+STEP_TIME_LIMIT        = 0.30
+VALUE_LIMIT            = 100_000_000_000  # Classifiers only
+
+[COLLATZ_LIKE]
+# from _compute_anb_stats in dynamical_sequences
+ALLOW_EVEN_A_OR_B      = false       # default false
+A_B_LIMIT              = 9           # default 9
+DRIFT_BITS_EPS         = 0.25        # default 0.25
+DRIFT_MIN_BITS         = 4096        # default 4096
+DRIFT_WINDOW           = 256         # default 256
+MAX_STEPS              = 2_000_000   # default 200_000
+TIME_BUDGET_S          = inf         # default inf
+VALUE_CAP_BITS         = 20_000      # default 20_000
+
+# from _detail_for_anb in dynamic_sequences
+A_VALUE                = 3           # Generalized Collatz (odd: an+b)
+B_VALUE                = 3           # Generalized Collatz (odd: an+b)
+
+[COMBINATORIAL]
+TIME_BUDGET_S          = 0.5
+
+[DIOPHANTINE]
+# remove or comment a key to set "unlimited"
+ALLOW_ZERO_IN_DECOMP          = false # if false, excludes any result with a==0 or b==0.
+MAX_ABS_FOR_SUM_OF_3_CUBES    = 150
+MIN_PALINDROME_DIGITS         = 2
+MAX_SOL_SUM_OF_2_CUBES        = 20
+MAX_SOL_SUM_OF_2_PALINDROMES  = 20
+MAX_SOL_SUM_OF_2_SQUARES      = 20
+MAX_SOL_SUM_OF_3_CUBES        = 20
+MAX_SOL_SUM_OF_3_PALINDROMES  = 20
+MAX_SOL_SUM_OF_3_SQUARES      = 20
+
+# ==========================
+# Unique classifier settings
+# ==========================
+
+[CLASSIFIER.BELL]
+# from is_bell_number in combinatorial_geometric.py
+MAX_K                  = 2_500
+
+[CLASSIFIER.CATALAN]
+# from is_catalan_number in combinatorial_geometric.py
+MAX_K                  = 200_000
+
+[CLASSIFIER.DUCCI]
+# from is_seq_ducci4 in dynamical_sequences.py
+MAX_STEPS              = 256
+
+[CLASSIFIER.EGYPTIAN]
+# from is_egyptian_profile in conjectures.py
+DISTINCT               = true
+K_VALUE                = 2
+M_VALUE                = 4
+MAX_DENOM              = 10_000_000_000_000_000_000_000
+MAX_EXAMPLES           = 1
+TIME_BUDGET_S          = 0.20
+
+[CLASSIFIER.GOLDBACH]
+# from is_goldbach_sum_of_two_primes in conjectures.py
+MAX_LIST               = 300         # default 5
+PROBE_CAP              = 500_000     # default 500_000
+SHOW_ALL               = true        # default false
+SHOW_COUNT             = true        # default true        - Show how many p to try in quick path
+SIEVE_MAXN             = 10_000_000  # default 10_000_000  - Absolute cap for sieve use
+
+[CLASSIFIER.FUBINI]
+# from is_fubini_number in conjectures.py
+MAX_INDEX              = 5000
+
+[CLASSIFIER.GRAFTING]
+# from is_grafting_number in digit_based.py
+ALLOW_STRADDLE         = true
+EARLY_STOP_ZEROS       = 2
+GUARD_EXTRA_DIGITS     = 8
+HARD_MAX_ORDER         = 12
+MAX_DIGITS             = 200
+MAX_ORDER              = 6
+SIDE                   = "either"
+
+[CLASSIFIER.K_FULL]
+# from is_k_full in arithmetic_divisor.py
+K_VALUE                = 4           # default 4           - Minimal exponent required in the prime factorisation
+
+[CLASSIFIER.LAH]
+# from is_lah_number in combinatorial_geometric.py
+MAX_INDEX              = 10_000
+
+[CLASSIFIER.LCM_PREFIX]
+MAX_DIGITS             = 2000
+MAX_K                  = 500000
+
+[CLASSIFIER.LEGENDRE]
+# from is_legendre_between_squares in conjectures.py
+MAX_LIST               = 20
+SHOW_ALL               = true
+SHOW_COUNT             = true
+
+[CLASSIFIER.LEMOINE]
+# from is_lemoine in conjectures.py
+MAX_LIST               = 300
+SHOW_ALL               = true
+SHOW_COUNT             = true
+
+[CLASSIFIER.MOTZKIN]
+# from is_motzkin_number in combinatorial_geometric.py
+MAX_K                  = 200_000
+
+[CLASSIFIER.PRIMORIAL]
+MAX_DIGITS             = 200
+MAX_PRIMES             = 5000
+
+[CLASSIFIER.RANDA]
+# from is_seq_reverse_and_add in dynamical_sequences.py
+MAX_STEPS              = 1000
+PRINT_ALWAYS_IF        = 30
+
+[CLASSIFIER.ULAM]
+# from is_ulam_number in named_sequences.py
+TIME_BUDGET_S          = 0.5
+
+[CLASSIFIER.WEAK_GOLDBACH]
+# from is_weak_goldbach in conjectures.py
+MAX_LIST               = 300         # default 5
+SHOW_ALL               = true        # default false
+SHOW_COUNT             = true        # default true
+
+[CLASSIFIER.ZECKENDORF]
+SPARSE_MAX_TERMS       = 3
+
+[CLASSIFIER.ZNAM]
+# from is_znam_chain in conjectures.py 
+MAX_BRANCH_PER_LEVEL   = 150
+MAX_EXAMPLES           = 1
+MAX_PRODUCT_BITS       = 1024
+MAX_WINDOW             = 124
+ODD_ONLY               = false
+PREFIX_WINDOW          = 48
+REQUIRE_PROPER         = true
+START                  = 2
+TIME_BUDGET_S          = 2.0
+
+[CLASSIFIER.ZUMKELLER]
+# from is_zumkeller in arithmetic_divisor.py
+BITSET_TARGET_CAP      = 10_000_000
+DIVISOR_LIMIT          = 5000
+SMALL_TAU_MITM         = 32
+WITNESS_TARGET_CAP     = 200_000

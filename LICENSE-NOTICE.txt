@@ -1,0 +1,35 @@
+NumClass
+Copyright © 2025 Marcel van Dinteren
+
+This work is licensed under the
+Creative Commons Attribution–NonCommercial 4.0 International License
+(CC BY-NC 4.0).
+
+You are free to:
+- Share — copy and redistribute the material in any medium or format
+- Adapt — remix, transform, and build upon the material
+
+Under the following terms:
+- Attribution — You must give appropriate credit to the author
+  (Marcel van Dinteren), provide a link to the license, and indicate
+  if changes were made.
+- NonCommercial — You may not use the material for commercial purposes.
+
+This license is intentionally chosen. NumClass is an educational and
+exploratory number-theory tool, free for personal, academic, and other
+non-commercial use with attribution.
+
+Commercial use, redistribution for profit, or inclusion in paid
+products or services is not permitted without explicit written
+permission from the author.
+
+For the full legal text of this license, see:
+https://creativecommons.org/licenses/by-nc/4.0/
+
+──────────────────────────────────────────────────────────────────────
+
+Third-party data notice:
+
+This project includes or references sequence data derived from
+OEIS Foundation Inc. (2025), The On-Line Encyclopedia of Integer Sequences, Published electronically at https://oeis.org
+OEIS data is used under its own terms and conditions.

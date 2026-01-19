@@ -1,0 +1,8 @@
+#label	n	description	details	oeis
+Boring number	1911	"The first ""boring number"", a positive number with the least number of classifications (4)."	Ah, well... make that 5 now, since it’s also classified as a boring number!	
+Digit-Reversal constant	1089	Appears as the result of the classic three-digit reversal procedure: reverse, subtract, reverse, add.	Details: Start with 532 as example. Reverse: 235, Subtract: 532-235=297, Reverse: 792, Add: 297+792=1089.	
+Kaprekar Constant (3 digit)	495	The Kaprekar constant for 3-digit numbers.	Repeatedly subtract any number formed by its digits in ascending order from that in descending order. This process converges to the Kaprekar constant 495.	
+Kaprekar Constant (4 digit)	6174	The Kaprekar constant for 4-digit numbers.	Repeatedly subtract any number formed by its digits in ascending order from that in descending order. This process converges to the Kaprekar constant 6174	
+Harshad in all bases	1,2,4,6	An integer that is divisible by the sum of its digits in every base ≥ 2.	Only 1, 2, 4, and 6 are Harshad in every base ≥2.	
+Feller number	17	“Least random number” (Feller number).		
+Belphegor’s Prime	1000000000000066600000000000001	Belphegor’s Prime: 666 with 13 zeros on either side.		
