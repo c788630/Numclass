@@ -6,15 +6,15 @@
 from __future__ import annotations
 
 import tomllib
-
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 from time import perf_counter
 
+from numclass.context import NumCtx
 from numclass.fmt import abbr_int_fast
 from numclass.registry import classifier
-from numclass.utility import CFG, check_oeis_bfile, fibonacci_index_if_member, zeckendorf_decomposition
+from numclass.utility import CFG, check_oeis_bfile, fib_upto, fibonacci_index_if_member, zeckendorf_decomposition
 from numclass.workspace import workspace_dir
 
 CATEGORY = "Named Sequences"
@@ -804,7 +804,7 @@ def is_2_term_zeckendorf(n: int) -> tuple[bool, str | None]:
     description="Zeckendorf decomposition uses few Fibonacci terms (weight ≤ K).",
     category=CATEGORY,
 )
-def is_sparse_zeckendorf(n: int, ctx: "NumCtx | None" = None) -> tuple[bool, str | None]:
+def is_sparse_zeckendorf(n: int, ctx: NumCtx | None = None) -> tuple[bool, str | None]:
     if n < 0:
         return False, None
 
@@ -821,4 +821,3 @@ def is_sparse_zeckendorf(n: int, ctx: "NumCtx | None" = None) -> tuple[bool, str
         idx_str = " + ".join(f"F{j}" for j in idxs)
         return True, f"weight {len(terms)} ≤ {K}: {n} = {sum_str} ({idx_str})"
     return False, None
-

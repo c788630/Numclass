@@ -648,6 +648,10 @@ def format_zeckendorf(n: int) -> str | None:
     idxs_desc = sorted(idxs, reverse=True)
     k = idxs_desc[0] if idxs_desc else 0
 
+    # Build body
+    ZECK_BITS_LOW_F = 2             # label is bits(F{k}..F2)
+    ZECK_PREVIEW_EDGE_COUNT = 3     # head/tail size for truncated preview
+    ZECK_MIN_PREVIEW_TERMS = 2      # minimal compact preview length (F_i + F_j)
 
     # Build body
     if len(terms) <= max_terms:
@@ -655,23 +659,25 @@ def format_zeckendorf(n: int) -> str | None:
         parts = " + ".join(fmt_int(t) for t in terms)
         fparts = " + ".join(f"F{j}" for j in idxs_desc)
         body = f"{parts} ({fparts})"
-        if show_bits and k >= 2:
-            body += f", bits(F{k}..F2)={fmt_bits(bits)}"
-    else:
-        # Huge: show a compact Fibonacci-index preview (no duplication)
-        if trunc_preview:
-            head = " + ".join(f"F{j}" for j in idxs_desc[:3])
-            tail = " + ".join(f"F{j}" for j in idxs_desc[-3:])
-            body = f"{head} + {ELL} + {tail}"
-        else:
-            # Minimal preview: first two terms (or one if only one exists)
-            if len(idxs_desc) >= 2:
-                body = f"F{idxs_desc[0]} + F{idxs_desc[1]}"
-            else:
-                body = f"F{idxs_desc[0]}"
 
-        if show_bits and k >= 2:
-            body += f", bits(F{k}..F2)={fmt_bits(bits)}"
+    # Huge: show a compact Fibonacci-index preview (no duplication)
+    elif trunc_preview:
+        head = " + ".join(f"F{j}" for j in idxs_desc[:ZECK_PREVIEW_EDGE_COUNT])
+        tail = " + ".join(f"F{j}" for j in idxs_desc[-ZECK_PREVIEW_EDGE_COUNT:])
+        body = f"{head} + {ELL} + {tail}"
+
+    # Minimal preview: first N terms (or one if only one exists)
+    elif len(idxs_desc) >= ZECK_MIN_PREVIEW_TERMS:
+        body = " + ".join(
+            f"F{j}" for j in idxs_desc[:ZECK_MIN_PREVIEW_TERMS]
+        )
+
+    else:
+        body = f"F{idxs_desc[0]}"
+
+    # Optional bits suffix (shared by both branches)
+    if show_bits and k >= ZECK_BITS_LOW_F:
+        body += f", bits(F{k}..F{ZECK_BITS_LOW_F})={fmt_bits(bits)}"
 
     return f"{fmt_int(n)} = {body}"
 

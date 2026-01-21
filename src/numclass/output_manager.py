@@ -144,7 +144,7 @@ class OutputManager:
 
                 self._mode = "split"
                 self._split_path = _choose_split_output_path(directory, number, ext=".txt", max_full_path_len=250)
-            
+
         elif self.output_file:
             # Single file append mode
             workspace = workspace_dir()

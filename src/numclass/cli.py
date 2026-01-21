@@ -452,13 +452,15 @@ def _main_impl(argv=None) -> int:
         om = make_output_manager(n)
         try:
 
+            if not args.quiet:
+                print("Analyzing number ⏳")
             ctx_for_n = build_ctx(abs(n))
 
             # 1) number & divisor stats
             print_statistics(n, args.items[0], show_details=not args.no_details, om=om)
 
             # 2) run classifiers (atomic + intersections)
-            results = classify(n, index=index, progress=True, ctx=ctx_for_n)
+            results = classify(n, index=index, progress=(not args.quiet), ctx=ctx_for_n)
 
             # 3) render results
             print_classifications(n, results, show_details=not args.no_details, om=om, index=index)
@@ -558,7 +560,7 @@ def _main_impl(argv=None) -> int:
                 try:
                     om = make_output_manager(n)
                     ctx_for_n = print_statistics(n, user_input, show_details=not args.no_details, om=om)
-                    results = classify(n, index=index, progress=True, ctx=ctx_for_n)
+                    results = classify(n, index=index, progress=(not args.quiet), ctx=ctx_for_n)
                     print_classifications(n, results, show_details=not args.no_details, om=om, index=index)
                     add_to_history(n, current_profile)
 

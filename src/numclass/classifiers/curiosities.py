@@ -189,7 +189,7 @@ def is_eban_number(n: int) -> tuple[bool, str | None]:
     description="Zeckendorf Fibonacci-base bitstring (bits(Fk..F2)) is palindromic.",
     category=CATEGORY,
 )
-def is_fibonacci_base_palindrome(n: int, ctx: "NumCtx | None" = None) -> tuple[bool, str | None]:
+def is_fibonacci_base_palindrome(n: int, ctx: NumCtx | None = None) -> tuple[bool, str | None]:
     if n < 0:
         return False, None
 

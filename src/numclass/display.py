@@ -53,7 +53,6 @@ from numclass.utility import (
     parity,
     set_aliquot_cache,
     totient_with_details,
-    zeckendorf_decomposition,
 )
 from numclass.workspace import workspace_dir
 
@@ -183,6 +182,7 @@ def print_statistics(n: int, user_input: str, show_details: bool = True, om=None
     """
     rt = _rt_current()
     debug = rt.debug
+    quiet = getattr(om, "quiet", False)
     ctx = None
 
     ALIGN_WIDTH = 22  # label column
@@ -404,7 +404,7 @@ def print_statistics(n: int, user_input: str, show_details: bool = True, om=None
 
     num_str = _stringify_guarded(n, label="number")
 
-    if not debug:
+    if not debug and not quiet:
         clear_screen()
     om.write(f"{Fore.CYAN + Style.BRIGHT}Number statistics:{Style.RESET_ALL}")
     if user_input != num_str:
@@ -417,6 +417,9 @@ def print_statistics(n: int, user_input: str, show_details: bool = True, om=None
     om.write(f"  Digits:               Count={digit_cnt}, Sum={digit_sum(n)}, Product={digit_product(n)}")
 
     om.write(f"  {'Parity:':<{ALIGN_WIDTH}}{parity(n)}")
+
+    if not quiet:
+        print("  Prime:                ⏳ Testing primality", end="\r", flush=True)
 
     label = "  Prime:                "
     prime_flag = ctx_isprime(n, ctx)
@@ -464,9 +467,13 @@ def print_statistics(n: int, user_input: str, show_details: bool = True, om=None
     if msg is not None:
         om.write(wrap_after_label("  Zeckendorf:           ", msg, wrap_long_tokens=True))
 
-    print("  Prime factorization:  Analyzing number ⏳", end="\r", flush=True)
+    if not quiet:
+        print("  Prime factorization:  Analyzing number ⏳", end="\r", flush=True)
+
     ctx = ctx or build_ctx(abs(n))
-    print("                                           ", end="\r", flush=True)
+
+    if not quiet:
+        print("                                           ", end="\r", flush=True)
 
     abs_n = ctx.n
 

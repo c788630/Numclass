@@ -825,7 +825,6 @@ def ctx_isprime(n: int, ctx: NumCtx | None = None) -> bool:
         return True
 
     # Fall back to SymPy primality test
-    print("  Prime:                ⏳ Testing primality", end="\r", flush=True)
     result = _isprime_lru(n)
 
     if ctx is not None and ctx.n == n:
@@ -1613,7 +1612,7 @@ def fib_upto(n: int, *, f0: int = 0, f1: int = 1) -> list[int]:
     Defaults to (0,1). Assumes n >= 0.
     """
     if n <= 0:
-        return [f0] if n == 0 else [f0]
+        return [f0]
     a, b = f0, f1
     out = [a, b]
     while b <= n:
@@ -1685,9 +1684,11 @@ def zeckendorf_decomposition(n: int) -> tuple[list[int], list[int], str]:
         else:
             i -= 1
 
+    ZECK_BITS_LOW_F = 2   # bitstring represents F{k} down to F2 (F1 is implicit)
+
     # Build a compact fib-base bitstring from max used index down to 2
     k = max(used_idx)
-    if k < 2:
+    if k < ZECK_BITS_LOW_F:
         # n==1 edge case; represent as "1" (still fine for display)
         return (used_terms, used_idx, "1")
 
