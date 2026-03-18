@@ -1,139 +1,170 @@
-# 🧮 NumClass — A Mathematical X-Ray Scanner for Integers
+# NumClass — a mathematical X-ray scanner for integers
 
-NumClass is an advanced, extensible number-theory exploration tool.  
-It takes a single integer — small or astronomically large — and instantly reveals hundreds of its structural mathematical properties.
+NumClass is a Python command-line tool that classifies integers into **200+ number-theory properties**.
 
-Whether you work with recreational mathematics, integer sequences, factorization, aliquot theory, combinatorics, or computational experiments, NumClass acts as a **mathematical X-ray scanner for integers**: you can explore what an integer *is*, how it behaves, and how it connects to the wider universe of number theory.
+Give it an integer and it can reveal properties spanning primes, divisors, figurate numbers, pseudoprimes, digit-based curiosities, named sequences, dynamical sequences, Diophantine representations, and more. It is designed for both everyday exploration and large-integer experiments, with support for configurable profiles, user extensions, and overrideable data files.
 
-## 🚀 Features
+## Why NumClass?
 
-- **200+ number-theory classifiers**
-- **Number and divisor statistics**  
-- **Aliquot sequence engine**  
-- **Advanced factorization pipeline**  
-- **User profiles** for full configurability
-- **Efficient intersection logic** (e.g., "Happy palindromic prime")
-- **Detailed explanations** for each classification
-- **Auto-discovers custom classifiers**: simply add your own!  
+Many integer tools answer one narrow question:
 
-### Core Categories:
-- **Arithmetic and Divisor-based** such as Perfect, Abundant, Deficient, Powerful, Practical, Sociable, Triperfect, and more.
-- **Combinatorial and Geometric** such as Bell, cake numbers, Catalan, Motzkin, Stirling, Ramsey, etc.
-- **Conjectures and Equation-based** including Egyptian fractions, Erdős–Straus, Goldbach, Legendre, and others.
-- **Digit-based** like Palindrome, Automorphic, Happy, Narcissistic, Self, Kaprekar, etc.
-- **Diophantine representations** — Numbers expressible as sums of squares or cubes.
-- **Dynamical Sequences** such as Collatz, Ducci, Fibonacci mod n and Kaprekar routines.
-- **Fun Numbers** — notable in pop culture, the internet, computing, or science fiction.
-- **Mathematical Curiosities** including Münchausen, Kaprekar constants, strobogrammatic, vampire and Eban numbers.
-- **Named Sequences** such as Busy Beaver, Carol, Lucky, Keith, Padovan and Taxicab numbers.
-- **Polygonal and Figurate** including Triangular, Pentagonal, Pronic, Cyclic, and Repunit numbers.
-- **Primes and Prime-related numbers** including twin, safe, sexy, Sophie Germain, palindromic, emirp, factorial, strong, super primes, and more.
-- **Pseudoprimes and Cryptographic numbers** such as Blum, Carmichael, Fermat, and Euler–Jacobi pseudoprimes.
+- Is this number prime?
+- What is its factorization?
+- Is it triangular or perfect?
 
-The classification is fast and accurate thanks to algorithmic optimizations and the use of OEIS `bXXXXXX.txt` files for computationally heavy calculations where applicable.  
+NumClass takes a broader approach: it asks **what kind of number is this?**
 
-See the NumClass User Manual in 'docs/' for detailed information, including installation and configuration.
+That makes it useful for:
 
-## 🧠 Why?
+- recreational number theory
+- OEIS-inspired exploration
+- education and demos
+- testing mathematical curiosities
+- experimenting with custom classifiers
+- exploring large integers in a structured way
 
-Because every integer has a story.  
-Whether you're a math enthusiast or educator, this tool lets you explore the wild and wonderful world of numbers.
+## What it does
 
-Inspired by [Numberphile](https://www.youtube.com/user/numberphile) and their love of surprising number facts!
+NumClass can identify and explain properties across many families, including:
 
-## ▶️ Usage
+- arithmetic and divisor-based numbers
+- combinatorial and geometric sequences
+- conjecture- and equation-based classes
+- digit-based numbers
+- Diophantine representations
+- dynamical sequences
+- figurate and polygonal numbers
+- prime and prime-related numbers
+- pseudoprimes and cryptographic numbers
+- named sequences and mathematical curiosities
+- “fun numbers” from computing, science fiction, and pop culture
 
-Simply type `numclass` to start interactive mode or use it as command line interface (CLI):   
-```numclass [-h] [--output OUTPUT] [--quiet] [--no-details] [--debug] [number]```
+It also includes:
 
-- `[number]` Number to classify (if no number is given, launches in interactive mode)
+- **200+ classifiers**
+- **detailed explanations** for matches
+- **intersection logic** for combined labels
+- **profiles** to enable or disable groups of classifiers
+- **workspace overrides** for data, profiles, and classifiers
+- **custom classifier discovery**
+- **OEIS-backed data files** where useful for heavy computations
+- **aliquot sequence support**
+- **large-integer friendly design**
 
-Options:
-- `-h`, `--help` Show this help message and exit
-- `--output OUTPUT` Output file or directory (see user/settings.py for more info)
-- `--quiet` Suppress screen output (for quiet file output)
-- `--no-details` Do not show explanation/details for results
-- `--debug` Debug mode (including timings)   
+## Installation
 
+### Recommended: install as a CLI with `pipx`
 
-## 🔍 Example Output
-
-![numclass in action](images/output42.jpg)
-
-## 📁 File Structure
-
-```text
-numclass/
-├── src/
-│   └── numclass/
-│       ├── classifiers/
-│       │   ├── arithmetic_divisor.py
-│       │   ├── combinatorial_geometric.py
-│       │   ├── conjectures.py
-│       │   ├── curiosities.py
-│       │   ├── curiosity_constants.py
-│       │   ├── digit_based.py
-│       │   ├── diophantine.py
-│       │   ├── dynamical_sequences.py
-│       │   ├── fun_number.py
-│       │   ├── named_sequences.py
-│       │   ├── polygonal_figurate.py
-│       │   └── …
-│       ├── data/
-│       │   ├── b000041.txt
-│       │   ├── b000108.txt
-│       │   ├── …
-│       │   ├── curiosity_constants.tsv
-│       │   ├── erdos_woods.toml
-│       │   ├── fun_numbers.tsv
-│       │   ├── hard_factors.txt
-│       │   ├── intersections.toml
-│       │   ├── special_inputs.tsv
-│       │   └── sum_of_three_cubes.toml
-│       ├── profiles/
-│       │   ├── default.toml
-│       │   ├── all.toml
-│       │   └── …
-│       ├── classify.py
-│       ├── cli.py
-│       ├── config.py
-│       ├── context.py
-│       ├── dataio.py
-│       ├── display.py
-│       ├── expreval.py
-│       ├── fmt.py
-│       ├── intersections.py
-│       ├── output_manager.py
-│       ├── progress.py
-│       ├── registry.py
-│       ├── runtime.py
-│       ├── transform.py
-│       ├── utility.py
-│       ├── workspace.py
-│       ├── __main__.py
-│       └── __init__.py
-├── tests/
-│   └── test_numclass.py
-├── docs/
-│   └── NumClass Manual 1.0 for NumClass 2.0.pdf
-├── images/
-│   └── output42.jpg
-├── CHANGELOG.md
-├── CONTRIBUTING.md
-├── CODE_OF_CONDUCT.md
-├── LICENSE
-├── SECURITY.md
-├── pyproject.toml
-└── README.md
+```bash
+pipx install "git+https://github.com/c788630/Numclass@main"
 ```
 
-## ⚖️ License
-[![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
+If you do not already have `pipx`:
 
-NumClass is licensed under the Creative Commons Attribution–NonCommercial
-4.0 International License (CC BY-NC 4.0).
+```bash
+python3 -m pip install --user pipx
+python3 -m pipx ensurepath
+```
 
-It is free for personal, academic, and other non-commercial use with
-attribution. Commercial use requires explicit permission from the author.
+On Windows, you can also use:
 
-See `LICENSE` for the full legal text.
+```bash
+py -m pip install --user pipx
+py -m pipx ensurepath
+```
+
+After `ensurepath`, restart your terminal if needed.
+
+### Alternative: install with `pip`
+
+```bash
+pip install "git+https://github.com/c788630/Numclass@main"
+```
+
+## Quick start
+
+Initialize your workspace:
+
+```bash
+numclass init
+```
+
+See where NumClass stores its workspace paths:
+
+```bash
+numclass where
+```
+
+Try it on a classic example:
+
+```bash
+numclass 1729
+```
+
+Run interactive mode:
+
+```bash
+numclass
+```
+
+## Typical usage
+
+```bash
+numclass [number]
+```
+
+If no number is provided, NumClass starts in interactive mode.
+
+Useful options:
+
+```bash
+numclass --help
+numclass --debug 1729
+numclass --no-details 1729
+numclass --quiet 1729
+```
+
+## Example
+
+Example classifications for a number may include things like:
+
+- Hardy–Ramanujan number
+- Taxicab number
+- palindromic prime
+- triangular number
+- Carmichael number
+- automorphic number
+
+The exact output depends on the number, enabled profile, and available data.
+
+## Workspace and customization
+
+NumClass uses a user workspace so that you can customize behavior **without modifying the installed package**.
+
+The workspace can contain:
+
+- profiles
+- data overrides
+- user-defined classifiers
+- intersections and other editable configuration
+
+This design is intended to make NumClass a configurable classification framework, not just a fixed one-purpose script.
+
+## Documentation
+
+This README is the quick-start guide.
+
+For the full user manual, examples, classifier details, and additional background, see the documentation in [`docs/`](docs/).
+
+## Project structure
+
+At a high level:
+
+- `src/numclass/` — application code
+- `tests/` — tests
+- `docs/` — manual and extended documentation
+- `images/` — screenshots and supporting images
+
+## License
+
+NumClass is licensed under the Creative Commons Attribution–NonCommercial 4.0 International License (CC BY-NC 4.0).
