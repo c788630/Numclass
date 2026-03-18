@@ -160,10 +160,10 @@ For the full user manual, examples, classifier details, and additional backgroun
 
 At a high level:
 
-- `src/numclass/` — application code
-- `tests/` — tests
-- `docs/` — manual and extended documentation
-- `images/` — screenshots and supporting images
+- `src/numclass/` - application code
+- `tests/` - tests
+- `docs/` - manual and extended documentation
+- `images/` - screenshots and supporting images
 
 ## License
 
