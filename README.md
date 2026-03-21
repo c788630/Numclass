@@ -125,17 +125,7 @@ numclass --quiet 1729
 ```
 
 ## Example
-
-Example classifications for a number may include things like:
-
-- Hardy–Ramanujan number
-- Taxicab number
-- palindromic prime
-- triangular number
-- Carmichael number
-- automorphic number
-
-The exact output depends on the number, enabled profile, and available data.
+[Example output](https://github.com/c788630/Numclass/blob/main/images/output42.jpg)
 
 ## Workspace and customization
 
