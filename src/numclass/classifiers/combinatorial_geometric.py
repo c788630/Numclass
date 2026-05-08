@@ -774,6 +774,37 @@ def _vdw_trivial_witnesses(n: int, include_trivial=False) -> list[tuple[int, int
 
 
 @classifier(
+    label="Rooted tree number",
+    description="Number of rooted unlabeled trees with n vertices.",
+    oeis="A000081",
+    category=CATEGORY,
+)
+def is_rooted_tree_number(n: int) -> tuple[bool, str | None]:
+    """
+    Returns (True, details) if n is a rooted tree number (OEIS A000081).
+    Uses the OEIS b-file b000081.txt.
+    """
+    if n < 1:
+        return False, None
+
+    found, idx_file, series, idx_set = check_oeis_bfile("b000081.txt", n)
+    if not series:
+        return False, None
+
+    if found:
+        idx = idx_file if idx_file is not None else idx_set
+
+        if idx is not None:
+            return True, (
+                f"There are {n} rooted unlabeled trees with {idx} vertices."
+            )
+
+        return True, "Listed in OEIS A000081."
+
+    return False, None
+
+
+@classifier(
     label="Van der Waerden number (exact)",
     description="Checks if n equals a proved non-trivial Van der Waerden number W(r,k); trivial cases optional.",
     oeis=None,

@@ -471,6 +471,8 @@ def is_lucky_number(n: int) -> tuple[bool, str]:
     """
     if n < 1:
         return False, None
+    if n > 999999:
+        return False, "Number is beyond practical limit: sieve becomes memory/time heavy beyond 999999."
     numbers = list(range(1, max(n, 10000) + 1, 2))  # Start with odd numbers
     idx = 1
     # Start sieving from the second element (1-based index in mathematical description)
@@ -555,6 +557,27 @@ def is_pell_number(n: int) -> tuple[bool, str]:
 
     return False, None
 
+
+@classifier(
+    label="Prime-count landmark",
+    description="Equals π(10^n), the number of primes ≤ 10^n.",
+    oeis="A006880",
+    category=CATEGORY,
+)
+def is_prime_count_landmark(n: int) -> tuple[bool, str]:
+    found, idx_file, series, idx_set = check_oeis_bfile("b006880.txt", n)
+
+    if not found:
+        return False, ""
+
+    # A006880 is indexed as n = 0, 1, 2, ...
+    k = idx_file
+
+    return True, (
+        f"{n} is a prime-count landmark: "
+        f"{n} = π(10^{k}), the number of primes ≤ 10^{k} "
+        f"({10**k:,})."
+    )
 
 @classifier(
     label="Taxicab number",
