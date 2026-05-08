@@ -5,7 +5,7 @@ Number Classifier - Mathematical Classifications and Curiosities
 
 Author:      Marcel M W van Dinteren <m.vandinteren1@chello.nl>
 Date:        2025-12-25
-Version:     2.0.0
+Version:     2.1.0
 
 Description:
     Classifies an integer n according to various mathematical properties

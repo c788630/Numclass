@@ -603,7 +603,9 @@ def is_primorial_number(n: int) -> tuple[bool, str | None]:
             factors_str = " × ".join(str(q) for q in primes)
             details = (
                 f"{abbr_int_fast(n)} is a primorial number: "
-                f"{p}# = {factors_str}."
+                f"{p}# = {factors_str}. "
+                f"Since π({p}) = {len(primes)}, this is the product of the first "
+                f"{len(primes)} primes."
             )
             return True, details
 
@@ -923,7 +925,7 @@ def is_strong_prime(n: int, ctx: NumCtx | None = None) -> tuple[bool, str | None
 
 @classifier(
     label="Super prime",
-    description="Prime whose index in primes is prime.",
+    description="Prime whose index in primes is also a prime.",
     oeis="A006450",
     category=CATEGORY,
     limit=10**8-1

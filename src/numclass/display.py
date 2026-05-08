@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from numclass.context import NumCtx
 
 from colorama import Fore, Style, init
-from sympy import isprime, nextprime, prevprime
+from sympy import isprime, nextprime, prevprime, primepi
 from sympy.ntheory import n_order
 
 from numclass import __version__
@@ -427,13 +427,28 @@ def print_statistics(n: int, user_input: str, show_details: bool = True, om=None
 
     _SMALLEST_PRIME = 2
     _MAX_DIGITS = 350
+    _MAX_PRIME_PI_N = 10**10
+
     if digit_cnt < _MAX_DIGITS:
         # Only pay for prime neighbors when small enough
         p_lo = prevprime(n) if n > _SMALLEST_PRIME else None
         p_hi = nextprime(n)
-        msg = f"{prime_str}, nearest primes: ◀{p_lo} ▶{p_hi}" if p_lo is not None else f"No, nearest prime: ▶{p_hi}"
+
+        if p_lo is not None:
+            msg = f"{prime_str}, nearest primes: ◀{p_lo} ▶{p_hi}"
+        else:
+            msg = f"No, nearest prime: ▶{p_hi}"
+
+        # Only calculate/display π(x) and prime density when cheap enough
+        if n <= _MAX_PRIME_PI_N:
+            pi_of_n = int(primepi(n))
+            density = pi_of_n / n if n > 0 else 0
+
+            msg += f", π(n)={pi_of_n}, density={density:.2%}"
+
     else:
         msg = prime_str + "                    "
+
     om.write(wrap_after_label(label, msg, wrap_long_tokens=True))
 
     # Digital root and additive persistence
@@ -910,8 +925,8 @@ def print_classifications(n: int, results, show_details: bool = True, om=None, i
             # Too many: keep output compact
             om.write(
                 f"{Fore.WHITE}{Style.DIM}"
-                f"Rerun after issuing the 'debug on' command, or increase "
-                f"SKIPPED_MAX_LINES in your profile to view all skipped classifiers."
+                f"To view all skipped classifiers, rerun after issuing the 'debug on' command, "
+                f"or increase SKIPPED_MAX_LINES in your profile."
                 f"{Style.RESET_ALL}"
             )
 
