@@ -18,7 +18,7 @@ except Exception:
     try_transform_to_int = None
     TransformNotApplicable = None
 
-from numclass.utility import CFG, UserInputError, clear_screen, dec_digits
+from numclass.utility import CFG, UserInputError, clear_screen, dec_digits, read_text_from_workspace_or_package
 from numclass.workspace import workspace_dir
 
 # ---- simple number parsing helpers (keep original behavior) ----
@@ -85,22 +85,6 @@ _SCI_NOTATION_TOKEN = re.compile(
 _SEP_RX = re.compile(r"[\s\-_–—]+", re.UNICODE)
 
 
-def _read_datafile_text(name: str) -> str:
-    """
-    Load a data file from workspace data/ first, else packaged numclass.data.
-    Returns text or raises UserInputError if not found.
-    """
-    name = Path(name).name  # sanitize, disallow paths
-    up = Path(workspace_dir()) / "data" / name
-    if up.is_file():
-        return up.read_text(encoding="utf-8")
-
-    try:
-        return pkg_files("numclass.data").joinpath(name).read_text(encoding="utf-8")
-    except FileNotFoundError as err:
-        raise UserInputError(f"Special-input data file not found: data/{name}") from err
-
-
 def _norm_special_key(s: str) -> str:
     """
     Normalize for exact-match special inputs:
@@ -128,7 +112,7 @@ _SPECIAL_CACHE_MTIME: float | None = None
 
 def _load_special_inputs() -> dict[str, SpecialRow]:
     name = "special_inputs.tsv"
-    text = _read_datafile_text(name)
+    text = read_text_from_workspace_or_package(name)
 
     table: dict[str, SpecialRow] = {}
     r = csv.reader(io.StringIO(text), delimiter="\t")
@@ -187,6 +171,26 @@ def abbr_mersenne_number(p: int, *, k: int = 20) -> str:
     return f"{lead:0{k}d}{ELLIPSIS}{tail:0{k}d}"
 
 
+def _split_items(s: str) -> list[str]:
+    return [x.strip() for x in (s or "").split(";") if x.strip()]
+
+
+def _format_egg(description: str, extra: str) -> str:
+    lines = []
+
+    desc = (description or "").strip()
+    if desc:
+        lines.append(desc)
+
+    items = _split_items(extra)
+    if items:
+        if lines:
+            lines.append("")
+        lines.extend(items)
+
+    return "\n".join(lines)
+
+
 def _special_handler(key: str, handler: str, index: str, description: str, digits: str, extra: str) -> str:
     """
     Single special handler taking the 6 arguments from the file.
@@ -196,7 +200,33 @@ def _special_handler(key: str, handler: str, index: str, description: str, digit
 
     if h == "egg":
         # if egg, raise a user-facing message
-        raise UserInputError(description or "Easter egg.")
+        return _format_egg(description, extra)
+
+    if h == "person":
+        title = index.strip()
+        bio = description.strip()
+        dates = [x.strip() for x in digits.split(";") if x.strip()]
+        known_for = [x.strip() for x in extra.split(";") if x.strip()]
+
+        lines = []
+        lines.append("")
+        lines.append(f"{Fore.CYAN + Style.BRIGHT}{title}{Style.RESET_ALL}")
+
+        if bio:
+            lines.append("")
+            lines.append(bio)
+
+        if dates:
+            lines.append("")
+            lines.extend(dates)
+
+        if known_for:
+            lines.append("")
+            lines.append(f"{Fore.CYAN + Style.BRIGHT}Known for:{Style.RESET_ALL}")
+            for item in known_for:
+                lines.append(f"  - {item}")
+
+        return "\n".join(lines)
 
     if h in ("mersenne_exact", "mersenne"):
         # index = Mersenne index (e.g. 32), digits = decimal digits
@@ -214,16 +244,47 @@ def _special_handler(key: str, handler: str, index: str, description: str, digit
             clear_screen()
             p_int = int(p)
             abbr_number = abbr_mersenne_number(p_int, k=20)  # "first10…last10"
+            binary_abbr = "1" * 32 + "…" + "1" * 32
             lines.append(f"{Fore.CYAN + Style.BRIGHT}Number statistics:{Style.RESET_ALL}")
             lines.append(f"  Input:                {key}")
             lines.append(f"  Number:               {Fore.YELLOW + Style.BRIGHT}{abbr_number}{Style.RESET_ALL}")
             lines.append(f"  Digits:               Count={digs}")
             lines.append("  Parity:               Odd")
             lines.append("  Prime:                Yes")
+            # Digital root of Mersenne primes M_p = 2^p - 1
+            # p_int > 3 prime implies p ≡ 1 or 5 (mod 6)
+            dr = 3 if p_int == 2 else 7 if p_int == 3 else (1 if p_int % 6 == 1 else 4)
+            lines.append(f"  Digital root of |n|:  {dr}")
+            lines.append("")
+            lines.append(f"{Fore.CYAN + Style.BRIGHT}Digit-based{Style.RESET_ALL}")
+            lines.append("  - Odious number: Has an odd number of 1's in binary representation for |n|.")
+            lines.append(
+                f"{Fore.GREEN + Style.BRIGHT}"
+                f"    Details: Binary: {binary_abbr}, number of 1's: {p_int} (odd), "
+                f"total bits: {p_int}"
+                f"{Style.RESET_ALL}"
+            )
+            lines.append(
+                "  - Pernicious number: The number of 1 bits in the binary representation is prime."
+            )
+            lines.append(
+                f"{Fore.GREEN + Style.BRIGHT}"
+                f"    Details: Binary: {binary_abbr}, "
+                f"number of 1's: {p_int}; {p_int} is prime."
+                f"{Style.RESET_ALL}"
+            )
             lines.append("")
             lines.append(f"{Fore.CYAN + Style.BRIGHT}Primes and Prime-related Numbers{Style.RESET_ALL}")
-            lines.append("- Mersenne prime: Prime of form 2^p−1 where p is prime.")
-            lines.append(f"{Fore.GREEN + Style.BRIGHT}  Details: {description}.{Style.RESET_ALL}")
+            lines.append("  - Gaussian prime: Prime in the ring of Gaussian integers.")
+            lines.append(
+                f"{Fore.GREEN + Style.BRIGHT}"
+                f"    Details: {abbr_number} ≡ 3 mod 4 and a rational prime; thus, a Gaussian prime."
+                f"{Style.RESET_ALL}"
+            )
+
+            lines.append("  - Mersenne prime: Prime of form 2^p − 1 where p is prime.")
+            desc = description.rstrip(".")
+            lines.append(f"{Fore.GREEN + Style.BRIGHT}    Details: {desc}.{Style.RESET_ALL}")
 
         return "\n".join(lines)
 
@@ -305,13 +366,38 @@ def _would_exceed_digit_limit_for_pow(base: int, exp: int, limit: int = _MAX_DIG
     return digits_lb > limit
 
 
+def _double_factorial(n: int) -> int:
+    """Return n!! for n >= 0. Uses the convention 0!! = 1."""
+    if n < 0:
+        raise _IntExprError("double factorial requires non-negative integer")
+    result = 1
+    for k in range(n, 0, -2):
+        result *= k
+    return result
+
+
+def _subfactorial(n: int) -> int:
+    """Return !n, the number of derangements of n objects."""
+    if n < 0:
+        raise _IntExprError("subfactorial requires non-negative integer")
+    if n == 0:
+        return 1
+    if n == 1:
+        return 0
+
+    a, b = 1, 0  # !0, !1
+    for k in range(2, n + 1):
+        a, b = b, (k - 1) * (a + b)
+    return b
+
+
 def _eval_int_expr(expr: str) -> int:
     """
     Evaluate a *safe* integer expression.
 
     Allowed: integers (incl. underscores), parentheses,
              + - * // % **, << >>, & ^ |, unary +/-,
-             and the special __fact__(...) wrapper for factorial.
+             and synthetic wrappers for factorial-family operators.
 
     Disallowed: names, general calls (except __fact__), attributes,
                 subscripts, lists, etc.
@@ -422,23 +508,32 @@ def _eval_int_expr(expr: str) -> int:
                 right = _eval(node.right, modulus=modulus)
                 return _ALLOWED_BINOPS[op_type](left, right)
 
-        # --- Support our synthetic factorial call: __fact__(...) ---
+        # --- Support synthetic factorial-family calls only ---
         if isinstance(node, ast.Call):
-            if isinstance(node.func, ast.Name) and node.func.id == _FAKE_FACT:
-                if node.keywords:
-                    raise _IntExprError("factorial does not take keyword arguments")
-                if len(node.args) != 1:
-                    raise _IntExprError("factorial takes exactly one argument")
-                val = _eval(node.args[0], modulus=modulus)
-                if not isinstance(val, int):
-                    raise _IntExprError("factorial argument must be an integer")
-                if val < 0:
-                    raise _IntExprError("factorial requires non-negative integer")
-                # We rely on the *final* digit-limit check after evaluation
-                # to reject insanely large n! values if they exceed MAX_DIGITS.
-                return math.factorial(val)
+            if not isinstance(node.func, ast.Name):
+                raise _IntExprError("function calls are not allowed")
 
-            raise _IntExprError("function calls are not allowed")
+            func = node.func.id
+            if func not in {_FAKE_FACT, _FAKE_DFACT, _FAKE_SUBFACT}:
+                raise _IntExprError("function calls are not allowed")
+
+            if node.keywords:
+                raise _IntExprError("factorial-family operators do not take keyword arguments")
+            if len(node.args) != 1:
+                raise _IntExprError("factorial-family operators take exactly one argument")
+
+            val = _eval(node.args[0], modulus=modulus)
+            if not isinstance(val, int):
+                raise _IntExprError("factorial-family argument must be an integer")
+            if val < 0:
+                raise _IntExprError("factorial-family operators require a non-negative integer")
+
+            # Rely on the final digit-limit check after evaluation to reject results exceeding MAX_DIGITS.
+            if func == _FAKE_FACT:
+                return math.factorial(val)
+            if func == _FAKE_DFACT:
+                return _double_factorial(val)
+            return _subfactorial(val)
 
         raise _IntExprError(f"unsupported syntax: {type(node).__name__}")
 
@@ -446,7 +541,7 @@ def _eval_int_expr(expr: str) -> int:
     value = _eval(tree.body, modulus=None)
 
     if not isinstance(value, int):
-        # Should not happen given our node handling, but keep it defensive
+        # Should not happen given our node handling, but to keep it defensive
         raise _IntExprError("expression did not evaluate to an integer")
 
     # Final global digit-limit guard on the result of the whole expression
@@ -575,90 +670,179 @@ def _replace_random_operator(expr: str) -> str:
 
 
 _FAKE_FACT = "__fact__"
+_FAKE_DFACT = "__dfact__"
+_FAKE_SUBFACT = "__subfact__"
 
 
-def _rewrite_factorial(expr: str) -> str:
+_TOKEN_CHARS = "._"
+
+
+def _is_token_char(ch: str) -> bool:
+    return ch.isalnum() or ch in _TOKEN_CHARS
+
+
+def _find_left_operand(expr: str, bang_pos: int) -> tuple[int, int]:
+    """Return [start, end) of the operand immediately left of a postfix !/!!."""
+    j = bang_pos - 1
+    while j >= 0 and expr[j].isspace():
+        j -= 1
+    if j < 0:
+        raise _IntExprError("factorial operator requires a left operand")
+
+    if expr[j] == ")":
+        level = 0
+        k = j
+        while k >= 0:
+            if expr[k] == ")":
+                level += 1
+            elif expr[k] == "(":
+                level -= 1
+                if level == 0:
+                    return k, j + 1
+            k -= 1
+        raise _IntExprError("unbalanced parentheses before factorial operator")
+
+    if not _is_token_char(expr[j]):
+        raise _IntExprError("factorial operator has invalid left operand")
+
+    k = j
+    while k >= 0 and _is_token_char(expr[k]):
+        k -= 1
+    return k + 1, j + 1
+
+
+def _find_right_operand(expr: str, bang_pos: int) -> tuple[int, int]:
+    """Return [start, end) of the operand immediately right of prefix !."""
+    n = len(expr)
+    j = bang_pos + 1
+    while j < n and expr[j].isspace():
+        j += 1
+    if j >= n:
+        raise _IntExprError("subfactorial '!' requires a right operand")
+
+    if expr[j] == "(":
+        level = 0
+        k = j
+        while k < n:
+            if expr[k] == "(":
+                level += 1
+            elif expr[k] == ")":
+                level -= 1
+                if level == 0:
+                    return j, k + 1
+            k += 1
+        raise _IntExprError("unbalanced parentheses after subfactorial '!'")
+
+    if not _is_token_char(expr[j]):
+        raise _IntExprError("subfactorial '!' has invalid right operand")
+
+    k = j
+    while k < n and _is_token_char(expr[k]):
+        k += 1
+    return j, k
+
+
+def _has_left_operand(expr: str, bang_pos: int) -> bool:
+    j = bang_pos - 1
+    while j >= 0 and expr[j].isspace():
+        j -= 1
+    return j >= 0 and (expr[j] == ")" or _is_token_char(expr[j]))
+
+
+def _rewrite_postfix_factorials(expr: str) -> str:
     """
-    Rewrite postfix factorial 'x!' into '__fact__(x)'.
+    Rewrite postfix factorial operators:
+        5!       -> __fact__(5)
+        5!!      -> __dfact__(5)
+        (3+2)!   -> __fact__((3+2))
+        (3+2)!!  -> __dfact__((3+2))
 
-    Handles:
-        5!
-        (3+2)!
-        1:23!      -> 1:__fact__(23)
-
-    Does NOT allow:
-        !5         (no prefix factorial)
-        3!!        (no double/nested factorial)
-        (3!)!      (no factorial of factorial)
-
-    The goal is to let Python's AST handle precedence/grouping,
-    while we only transform the postfix '!' into a safe call.
+    This intentionally rejects nested/chained postfix factorials such as
+    (3!)! and 3!!!. They can be added later, but this keeps precedence clear.
     """
     out: list[str] = []
     n = len(expr)
-    pos = 0  # start of the next chunk to copy
-
+    pos = 0
     i = 0
+
     while i < n:
-        if expr[i] != '!':
+        if expr[i] != "!" or not _has_left_operand(expr, i):
             i += 1
             continue
 
-        # We found a '!' at position i; find the operand to its left.
-        j = i - 1
-        # Skip spaces just before '!'
-        while j >= 0 and expr[j].isspace():
-            j -= 1
-        if j < 0:
-            raise _IntExprError("factorial '!' requires a left operand")
+        op_len = 2 if i + 1 < n and expr[i + 1] == "!" else 1
+        operand_start, operand_end = _find_left_operand(expr, i)
 
-        # Case 1: operand ends in ')': need to find matching '('
-        if expr[j] == ')':
-            level = 0
-            k = j
-            while k >= 0:
-                if expr[k] == ')':
-                    level += 1
-                elif expr[k] == '(':
-                    level -= 1
-                    if level == 0:
-                        break
-                k -= 1
-            if k < 0 or level != 0:
-                raise _IntExprError("unbalanced parentheses before '!'")
-            operand_start = k
-
-        else:
-            # Case 2: operand is a "token" (digits/letters/underscore/dot),
-            # e.g.  123,  0xFF,  abc,  1_000.000
-            if not (expr[j].isalnum() or expr[j] in "._"):
-                # e.g. '3!!' (second '!' sees previous '!' as operand)
-                raise _IntExprError("factorial '!' has invalid left operand")
-
-            k = j
-            while k >= 0 and (expr[k].isalnum() or expr[k] in "._"):
-                k -= 1
-            operand_start = k + 1
-
-        # Prevent rewriting inside an already-rewritten chunk:
         if operand_start < pos:
-            # This catches patterns like (3!)! or 3!!, which we don't support.
-            raise _IntExprError("nested factorial '!' is not supported")
+            raise _IntExprError("nested factorial operators are not supported")
 
-        # Copy everything before the operand (that we haven't copied yet)
+        # Reject 3!!! as ambiguous: is it (3!!)! or (3!)!! ?
+        if i + op_len < n and expr[i + op_len] == "!":
+            raise _IntExprError("chained factorial operators are not supported")
+
+        func = _FAKE_DFACT if op_len == 2 else _FAKE_FACT
+        operand_text = expr[operand_start:operand_end]
+
         out.append(expr[pos:operand_start])
+        out.append(f"{func}({operand_text})")
 
-        # The operand text is expr[operand_start : j+1]
-        operand_text = expr[operand_start:j+1]
-        out.append(f"{_FAKE_FACT}({operand_text})")
+        pos = i + op_len
+        i = pos
 
-        # Move past the '!' and continue scanning
-        pos = i + 1
-        i = i + 1
-
-    # Copy any remaining tail after the last '!'
     out.append(expr[pos:])
     return "".join(out)
+
+
+def _rewrite_prefix_subfactorials(expr: str) -> str:
+    """
+    Rewrite prefix subfactorial:
+        !5      -> __subfact__(5)
+        !(3+2)  -> __subfact__((3+2))
+
+    The postfix pass runs first, so 5!! and 5! are already protected.
+    """
+    out: list[str] = []
+    n = len(expr)
+    pos = 0
+    i = 0
+
+    while i < n:
+        if expr[i] != "!":
+            i += 1
+            continue
+
+        if _has_left_operand(expr, i):
+            # Remaining left-operand ! means something unsupported survived,
+            # e.g. nested/chained factorial syntax.
+            raise _IntExprError("unsupported factorial syntax")
+
+        operand_start, operand_end = _find_right_operand(expr, i)
+        out.append(expr[pos:i])
+        out.append(f"{_FAKE_SUBFACT}({expr[operand_start:operand_end]})")
+        pos = operand_end
+        i = operand_end
+
+    out.append(expr[pos:])
+    return "".join(out)
+
+
+def _rewrite_factorials(expr: str) -> str:
+    """
+    Rewrite factorial-family notation into safe synthetic calls.
+
+    Supported:
+        n!        factorial
+        n!!       double factorial
+        !n        subfactorial / derangement number
+        (expr)!   factorial of parenthesized expression
+        (expr)!!  double factorial of parenthesized expression
+        !(expr)   subfactorial of parenthesized expression
+
+    Deliberately rejected for now: chained/nested forms like 3!!!, (3!)!, !5!.
+    """
+    expr = _rewrite_postfix_factorials(expr)
+    expr = _rewrite_prefix_subfactorials(expr)
+    return expr
 
 
 _SCI_NOTATION = re.compile(r"^([0-9]+)[eE]([+-]?[0-9]+)$")
@@ -712,14 +896,14 @@ def _rewrite_scientific_notation(expr: str) -> str:
 def _eval_specials(expr: str) -> int:
     """
     Support 'a:b:c' as decimal concatenation, '?' as random number,
-    and postfix '!' as factorial (rewritten to __fact__(...)).
+    postfix factorials, double factorials, and prefix subfactorials.
 
     Each segment is evaluated with the safe AST evaluator, then
     concatenated left-to-right.
     """
-    # First expand randoms, then rewrite factorial syntax
+    # First expand randoms, then rewrite factorial-family syntax.
     expr = _replace_random_operator(expr)
-    expr = _rewrite_factorial(expr)
+    expr = _rewrite_factorials(expr)
 
     segments = _split_top_level_colon(expr)
     if len(segments) <= 1:

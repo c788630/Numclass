@@ -421,6 +421,8 @@ def print_statistics(n: int, user_input: str, show_details: bool = True, om=None
     if not quiet:
         print("  Prime:                ⏳ Testing primality", end="\r", flush=True)
 
+    ctx = build_ctx(abs(n))
+
     label = "  Prime:                "
     prime_flag = ctx_isprime(n, ctx)
     prime_str = "Yes" if prime_flag else "No"
@@ -485,8 +487,6 @@ def print_statistics(n: int, user_input: str, show_details: bool = True, om=None
     if not quiet:
         print("  Prime factorization:  Analyzing number ⏳", end="\r", flush=True)
 
-    ctx = ctx or build_ctx(abs(n))
-
     if not quiet:
         print("                                           ", end="\r", flush=True)
 
@@ -516,9 +516,10 @@ def print_statistics(n: int, user_input: str, show_details: bool = True, om=None
 
     if n != 0 and abs_n > 1:
         pf_str, used_factors = format_prime_factors(
-            n, factors=factors, return_factors=True
-        )
-
+            abs_n,
+            factors=factors,
+            return_factors=True,
+)
         # Handle huge numbers where factorization was skipped and
         # ctx.fac == {} → no partial factors to display.
         if not used_factors:
@@ -666,7 +667,7 @@ def print_statistics(n: int, user_input: str, show_details: bool = True, om=None
 
             if show_div:
                 shown, truncated = enumerate_divisors_limited(factors, limit=max_divs if max_divs is not None else None)
-                s = ", ".join(map(str, shown))
+                s = ", ".join(map(lambda x: abbr_int_fast(x, threshold=100), shown))
                 if truncated:
                     s += (f" … {Style.RESET_ALL}{Fore.YELLOW}"
                           f"(truncated: showing first {len(shown)} of {tau_n}){Style.RESET_ALL}")
@@ -1205,13 +1206,9 @@ def show_intro_help(index, om=None) -> None:
         for line in help_lines:
             om.write(line) if om else print(line)
         # prompt
-        print(f"{Fore.LIGHTBLUE_EX}Enter h/s/c/r/e/l/q : {Style.RESET_ALL}", end="", flush=True)
-        key = _get_keypress().strip().lower()
-        if hasattr(om, "clear_line"):
-            try:
-                om.clear_line()
-            except Exception:
-                pass
+        key = input(
+            f"{Fore.LIGHTBLUE_EX}Enter choice [h/s/c/r/e/l/q] : {Style.RESET_ALL}"
+        ).strip().lower()
         if key == "h":
             clear_screen()
             if om:

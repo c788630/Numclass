@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "numclass"
-version = "2.1.0"
+version = "2.1.1"
 description = "Classify integers by number-theory properties"
 license = "CC-BY-NC-4.0"
 license-files = ["LICENSE*"]
@@ -13,13 +13,16 @@ requires-python = ">=3.11"
 dependencies = [
 "sympy>=1.12",
 "colorama>=0.4.6",
-"gmpy2>=2.1",
 ]
 
 [project.optional-dependencies]
+speed = [
+    "gmpy2>=2.1",
+]
+
 dev = [
-  "pytest>=8.4",
-  "ruff>=0.6.9",
+    "pytest>=8.4",
+    "ruff>=0.6.9",
 ]
 
 [project.scripts]

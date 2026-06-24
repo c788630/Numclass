@@ -1,47 +1,81 @@
 # This file defines special inputs that alter program execution (control flow)
-# Format: key<TAB>handler<TAB>index<TAB>description<TAB>digits<TAB>extra (comments start with #)
+# Format: key<TAB>handler<TAB>index<TAB>description<TAB>meta<TAB>extra (comments start with #)
 
-2**756839-1	mersenne_exact	32	Mersenne prime M32 2^756839-1, discovered in 1992 by D Slowinski and P Gage	227832	
-2**859433-1	mersenne_exact	33	Mersenne prime M33 2^859433-1, discovered in 1994 by D Slowinski and P Gage	258716	
-2**1257787-1	mersenne_exact	34	Mersenne prime M34 2^1257787-1, discovered in 1996 by D Slowinski and P Gage	378632	
-2**1398269-1	mersenne_exact	35	Mersenne prime M35 2^1398269-1, discovered in 1996 by J Armengaud in collaboration (France)	420921	
-2**2976221-1	mersenne_exact	36	Mersenne prime M36 2^2976221-1, discovered in 1997 by G Spence in collaboration (UK)	895932	
-2**3021377-1	mersenne_exact	37	Mersenne prime M37 2^3021377-1, discovered in 1998 by R Clarkson in collaboration (USA)	909526	
-2**6972593-1	mersenne_exact	38	Mersenne prime M38 2^6972593-1, discovered in 1999 by N Hajratwala in collaboration (USA)	2098960	
-2**13466917-1	mersenne_exact	39	Mersenne prime M39 2^13466917-1, discovered in 2001 by M Cameron in collaboration (Canada)	4053946	
-2**20996011-1	mersenne_exact	40	Mersenne prime M40 2^20996011-1, discovered in 2003 by M Shafer in collaboration (USA)	6320430	
-2**24036583-1	mersenne_exact	41	Mersenne prime M41 2^24036583-1, discovered in 2004 by J Findley in collaboration, (USA)	7235733	
-2**25964951-1	mersenne_exact	42	Mersenne prime M42 2^25964951-1, discovered in 2005 by M Nowak in collaboration (Germany)	7816230	
-2**30402457-1	mersenne_exact	43	Mersenne prime M43 2^30402457-1, discovered in 2005 by C Cooper and S Boone using GIMPS	9152052	
-2**32582657-1	mersenne_exact	44	Mersenne prime M44 2^32582657-1, discovered in 2006 by C Cooper and S Boone using GIMPS	9808358	
-2**43112609-1	mersenne_exact	45	Mersenne prime M45 2^43112609-1, discovered in 2008 by the University of California - LA using GIMPS	12978189	
-2**37156667-1	mersenne_exact	46	Mersenne prime M46 2^37156667-1, discovered in 2008 by H-M Elvenich using GIMPS	11185272	
-2**42643801-1	mersenne_exact	47	Mersenne prime M47 2^42643801-1, discovered in 2009 by OM Strindmo using GIMPS	12837064	
-2**57885161-1	mersenne_exact	48	Mersenne prime M48 2^57885161-1, discovered in 2013 by C Cooper using GIMPS	17425170	
-2**74207281-1	mersenne_exact	49	Mersenne prime M49 2^74207281-1, discovered in 2016 by C Cooper using GIMPS	22338618	
-2**77232917-1	mersenne_exact	50	Mersenne prime M50 2^77232917-1, discovered in 2017 by J Pace, Woltman,  using GIMPS	23249425	
-2**82589933-1	mersenne_exact	51	Mersenne prime M51 2^82589933-1, discovered in 2018 by P Laroche using GIMPS	24862048	
-2**136279841-1	mersenne_exact	52	Mersenne prime M52 2^136279841-1, discovered in 2024 by L Durant using GIMPS	41024320	
+2**756839-1	mersenne_exact	32	Mersenne prime M32 2^756839-1, discovered in 1992 by David Slowinski and Paul Gage	227832	
+2**859433-1	mersenne_exact	33	Mersenne prime M33 2^859433-1, discovered in 1994 by David Slowinski and Paul Gage	258716	
+2**1257787-1	mersenne_exact	34	Mersenne prime M34 2^1257787-1, discovered in 1996 by David Slowinski and Paul Gage	378632	
+2**1398269-1	mersenne_exact	35	Mersenne prime M35 2^1398269-1, discovered in 1996 by Joel Armengaud using GIMPS	420921	
+2**2976221-1	mersenne_exact	36	Mersenne prime M36 2^2976221-1, discovered in 1997 by Gordon Spence using GIMPS	895932	
+2**3021377-1	mersenne_exact	37	Mersenne prime M37 2^3021377-1, discovered in 1998 by Roland Clarkson using GIMPS	909526	
+2**6972593-1	mersenne_exact	38	Mersenne prime M38 2^6972593-1, discovered in 1999 by Nayan Hajratwala using GIMPS	2098960	
+2**13466917-1	mersenne_exact	39	Mersenne prime M39 2^13466917-1, discovered in 2001 by Michael Cameron using GIMPS	4053946	
+2**20996011-1	mersenne_exact	40	Mersenne prime M40 2^20996011-1, discovered in 2003 by Michael Shafer using GIMPS	6320430	
+2**24036583-1	mersenne_exact	41	Mersenne prime M41 2^24036583-1, discovered in 2004 by Josh Findley using GIMPS	7235733	
+2**25964951-1	mersenne_exact	42	Mersenne prime M42 2^25964951-1, discovered in 2005 by Martin Nowak using GIMPS	7816230	
+2**30402457-1	mersenne_exact	43	Mersenne prime M43 2^30402457-1, discovered in 2005 by Curtis Cooper and Steven Boone using GIMPS	9152052	
+2**32582657-1	mersenne_exact	44	Mersenne prime M44 2^32582657-1, discovered in 2006 by Curtis Cooper and Steven Boone using GIMPS	9808358	
+2**37156667-1	mersenne_exact	45	Mersenne prime M45 2^37156667-1, discovered in 2008 by Heinz-Michael Elvenich using GIMPS	11185272	
+2**42643801-1	mersenne_exact	46	Mersenne prime M46 2^42643801-1, discovered in 2009 by Ole Martin Strindmo using GIMPS	12837064	
+2**43112609-1	mersenne_exact	47	Mersenne prime M47 2^43112609-1, discovered in 2008 by Edson Smith at UCLA using GIMPS	12978189	
+2**57885161-1	mersenne_exact	48	Mersenne prime M48 2^57885161-1, discovered in 2013 by Curtis Cooper using GIMPS	17425170	
+2**74207281-1	mersenne_exact	49	Mersenne prime M49 2^74207281-1, discovered in 2016 by Curtis Cooper using GIMPS	22338618	
+2**77232917-1	mersenne_exact	50	Mersenne prime M50 2^77232917-1, discovered in 2017 by Jon Pace using GIMPS	23249425	
+2**82589933-1	mersenne_exact	51	Mersenne prime M51 2^82589933-1, discovered in 2018 by Patrick Laroche using GIMPS	24862048	
+2**136279841-1	mersenne_exact	52	Mersenne prime M52 2^136279841-1, discovered in 2024 by Luke Durant using GIMPS	41024320	
 0**0	egg		0⁰ is undefined — the true neutral element of confusion.		
 about	egg		Numclass v2.0.0 — classifying the universe, one integer at a time.		
+adventure	egg		Welcome to Adventure! Would you like instructions?		
+author	egg		© 2025–2026 Marcel van Dinteren https://github.com/c788630/Numclass		
+authors	egg		© 2025–2026 Marcel van Dinteren https://github.com/c788630/Numclass		
+bidibidibidi	egg		Okay Buck!		
 boring	egg		Boring number? Did you mean 1911?		
-cantor	egg		Cantor says your question has been placed in a set of all questions that don’t contain themselves. Please stand by for a paradox.		
+cantor	egg		Your question belongs to the set of all questions that don’t contain themselves. Please stand by for a paradox.		
 coffee	egg		Caffeination initialized. Divisor sums may take longer.		
-e	egg		Euler's constant. Naturally exponential.		
+credits	egg		© 2025–2026 Marcel van Dinteren https://github.com/c788630/Numclass		
+e	egg		Euler's number. Naturally exponential.		
+e2e4	egg		e7e5		
+d2d4	egg		d7d5		
+c2c4	egg		e7e5		
+g1f3	egg		d7d5		
+f2f4	egg		e7e5		
 error	egg		the input ‘error’ caused… an error. Halting before recursion forms.		
 exit	egg		exit is not a number. Nor a classifier. Nor an escape from mathematics.		
+falken	egg		Greetings, Professor Falken.		
 godel	egg		Self-reference detected. Classification undecidable.		
 hello	egg		Greetings, integer explorer.		
 inf	egg		Infinity reached. All classifiers apply and none complete. Ask Cantor.		
 +inf	egg		Positive infinity — growth without bound, hubris without limit.		
+joshua	egg		Greetings, Professor Falken.		
+knuth	egg		↑↑↑↑ There are enough arrows.		
+license	egg		Creative Commons Attribution-NonCommercial 4.0 International Public License		
+mandelbrot	egg		Zoom in.		
 nan	egg		Not a Number — not even close.		
+nanunanu	egg		Shazbot!		
 numclass	egg		That's me! Recursive classification detected.		
 petaQ	egg		Klingon profanity detected. Honor = 0.		
 phi	egg		Golden ratio reached — divine proportion achieved.		
 pi	egg		Transcendent beauty detected. π ≈ 3.1415926535897932384626433832795 — irrational and proud.		
-ramanujan	egg		Srinivasa whispers: 1729 is the smallest nontrivial taxi cab number.		
+plover	egg		Nothing happens... or did you forget the emerald?		
+plugh	egg		A hollow voice says "Plugh."		
 stop	egg		Stopping would violate the laws of mathematical motion. Classification must continue.		
+sudo	egg		Permission denied.		
+test	egg		Running self-diagnostics...		CPU: OK;Memory: OK;Number theory: OK;Sense of humor: WARNING;No problems detected.
 tohuvavohu	egg		Input is without shape or void — no valid integer formed.		
-turing	egg		Halting problem encountered. Classification aborted.		
-version	egg		Numclass v2.0.0 — classifying the universe, one integer at a time.		
+version	egg		Numclass v2.1.1 — classifying the universe, one integer at a time.		
+wargames	egg		Shall we Play a game?		
+wopr	egg		Shall we Play a game?		
+xyzzy	egg		Nothing happens.		
 ∞	egg		Mathematical nirvana reached. You are now everywhere at once.		
+gauss	person	Carl Friedrich Gauss (1777–1855)	Princeps mathematicorum and one of the founders of modern number theory.	Born: 30 Apr 1777, Brunswick; Died: 23 Feb 1855, Göttingen	Gaussian integers; quadratic reciprocity; Disquisitiones Arithmeticae; normal distribution
+euler	person	Leonhard Euler (1707–1783)	One of the most prolific mathematicians in history.	Born: 15 Apr 1707, Basel; Died: 18 Sep 1783, Saint Petersburg	Euler's totient; Euler's theorem; partitions; graph theory; e
+fermat	person	Pierre de Fermat (1607–1665)	French lawyer and amateur mathematician regarded as the father of modern number theory.	Born: 1607, Beaumont-de-Lomagne; Died: 12 Jan 1665, Castres	Fermat's Last Theorem; Fermat numbers; Fermat primes; infinite descent
+riemann	person	Bernhard Riemann (1826–1866)	German mathematician whose work transformed analysis and number theory.	Born: 17 Sep 1826, Breselenz; Died: 20 Jul 1866, Selasca	Riemann zeta function; Riemann hypothesis; complex analysis
+ramanujan	person	Srinivasa Ramanujan (1887–1920)	Self-taught Indian mathematician with extraordinary intuition for numbers.	Born: 22 Dec 1887, Erode; Died: 26 Apr 1920, Kumbakonam	Partitions; highly composite numbers; Ramanujan primes; mock theta functions
+mersenne	person	Marin Mersenne (1588–1648)	French monk and scholar after whom Mersenne primes are named.	Born: 8 Sep 1588, Oizé; Died: 1 Sep 1648, Paris	Mersenne primes; scientific correspondence; number theory
+lucas	person	Édouard Lucas (1842–1891)	French mathematician known for work on integer sequences and primality tests.	Born: 4 Apr 1842, Amiens; Died: 3 Oct 1891, Paris	Lucas numbers; Lucas-Lehmer test; Tower of Hanoi
+lehmer	person	Derrick Henry Lehmer (1905–1991)	American number theorist and pioneer of computational number theory.	Born: 23 Feb 1905, Berkeley; Died: 22 May 1991, Berkeley	Lehmer numbers; factorization methods; computational number theory
+erdos	person	Paul Erdős (1913–1996)	Hungarian mathematician famous for prolific collaboration and problem solving.	Born: 26 Mar 1913, Budapest; Died: 20 Sep 1996, Warsaw	Erdős numbers; combinatorics; probabilistic number theory
+conway	person	John Horton Conway (1937–2020)	British mathematician known for recreational and computational mathematics.	Born: 26 Dec 1937, Liverpool; Died: 11 Apr 2020, New Brunswick	Game of Life; surreal numbers; look-and-say sequence
+turing	person	Alan Turing (1912–1954)	British mathematician and pioneer of computer science.	Born: 23 Jun 1912, London; Died: 7 Jun 1954, Wilmslow	Turing machine; computability; cryptanalysis
+euclid	person	Euclid (c.325 BC – c.265 BC)	Ancient Greek mathematician often called the father of geometry.	Born: c.325 BC; Died: c.265 BC	Euclidean algorithm; Elements; number theory
+pythagoras	person	Pythagoras (c.570 BC – c.495 BC)	Ancient Greek philosopher and mathematician.	Born: c.570 BC, Samos; Died: c.495 BC, Metapontum	Pythagorean theorem; figurate numbers; philosophy

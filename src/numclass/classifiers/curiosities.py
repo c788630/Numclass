@@ -8,9 +8,11 @@ from __future__ import annotations
 import math
 from collections import Counter
 from dataclasses import dataclass
+from functools import lru_cache
+from time import perf_counter
 from typing import TYPE_CHECKING
 
-from sympy import prime, primerange
+from sympy import isprime, lcm, n_order, prime, primerange
 
 if TYPE_CHECKING:
     from numclass.context import NumCtx
@@ -18,10 +20,9 @@ if TYPE_CHECKING:
 from numclass.fmt import abbr_int_fast, format_factorization
 from numclass.registry import classifier
 from numclass.runtime import CFG
-from numclass.utility import build_ctx, check_oeis_bfile, dec_digits, get_ordinal_suffix, int_to_words, zeckendorf_decomposition
+from numclass.utility import build_ctx, check_oeis_bfile, dec_digits, get_ordinal_suffix, int_to_words, read_text_from_workspace_or_package, zeckendorf_decomposition
 
 CATEGORY = "Mathematical Curiosities"
-
 
 @classifier(
     label="Additive sequence",
@@ -100,6 +101,57 @@ def is_binary_interpretable(n: int) -> tuple[bool, str]:
 
 
 @classifier(
+    label="Block-power invariant",
+    description=(
+        "Can be split into equal-length digit blocks whose equal-power sum "
+        "equals the original number."
+    ),
+    oeis="A056733",
+    category=CATEGORY
+)
+def is_block_power_invariant(n: int) -> tuple[bool, str]:
+    """
+    A block-power invariant number can be split into equal-length digit
+    blocks such that the sum of the blocks raised to the same power equals
+    the original number.
+
+    Example:
+        166500333 = 166^3 + 500^3 + 333^3
+    """
+    if n < 0:
+        return False, None
+
+    s = str(n)
+    matches = []
+
+    for block_size in range(1, len(s)):
+        if len(s) % block_size != 0:
+            continue
+
+        blocks = [
+            int(s[i:i + block_size])
+            for i in range(0, len(s), block_size)
+        ]
+
+        # Skip trivial single-block cases
+        if len(blocks) < 2:
+            continue
+
+        for power in range(2, 10):
+            if sum(b ** power for b in blocks) == n:
+                expr = " + ".join(f"{b}^{power}" for b in blocks)
+                matches.append(
+                    f"{n} = {expr} "
+                    f"(block size {block_size}, power {power})"
+                )
+
+    if matches:
+        return True, "; ".join(matches)
+
+    return False, None
+
+
+@classifier(
     label="Cyclic permutation number",
     description="Multiples are cyclic rotations of its digits.",
     oeis="A180340",
@@ -173,7 +225,7 @@ def is_cyclops_number(n: int) -> tuple[bool, str]:
     description="No letter 'e' in the English spelling.",
     oeis="A006933",
     category=CATEGORY,
-    limit=66_000_000_000_000_000_000_000_000_000_000_066_066_000_000_066_066_066_066_066_066_066
+    limit=66_000_000_000_000_000_000_000_000_000_000_066_066_000_000_066_066_066_066_066_066_067
 )
 def is_eban_number(n: int) -> tuple[bool, str | None]:
 
@@ -204,6 +256,59 @@ def is_fibonacci_base_palindrome(n: int, ctx: NumCtx | None = None) -> tuple[boo
     k = max(idxs) if idxs else 0
     weight = len(terms)
     return True, f"bits(F{k}..F2)={bits} (palindrome), weight={weight}"
+
+
+GRAHAM_DIGIT_LIMIT = 10_000
+
+@lru_cache(maxsize=1)
+def _load_graham_last_digits() -> str:
+
+    text = read_text_from_workspace_or_package("graham_last_10000.txt")
+    if text is None:
+        return None
+    
+    digits = "".join(ch for ch in text if ch.isdigit())
+
+    if not digits:
+        return None
+
+    return digits[-GRAHAM_DIGIT_LIMIT:]
+
+
+@classifier(
+    label="Graham's number suffix",
+    description="Matches known final digits of Graham's number.",
+    category=CATEGORY,
+)
+def is_grahams_number_suffix(n: int) -> tuple[bool, str | None]:
+    """
+    Check whether n equals the last k digits of Graham's number,
+    where k is the number of digits in n.
+    """
+    if n <= 0:
+        return False, None
+
+    s = str(n)
+    digits = _load_graham_last_digits()
+    
+    if digits is None:
+        return False, None
+
+    if len(s) > len(digits):
+        return False, (
+            f"Cannot verify {len(s):,} trailing digits; "
+            f"only {len(digits):,} final Graham digits are available."
+        )
+
+    if digits.endswith(s):
+        if len(s) == 1:
+            detail = "Matches the last digit of Graham's number."
+        else:
+            detail = f"Matches the last {len(s):,} digits of Graham's number."
+
+        return True, detail
+
+    return False, None
 
 
 @dataclass(frozen=True)
@@ -318,6 +423,96 @@ def is_lcm_prefix_number(n: int, ctx: NumCtx | None = None) -> tuple[bool, str |
         )
 
     return True, f"k={k}. Prime powers: {powers}"
+
+
+@classifier(
+    label="Left factorial",
+    description="A Kurepa left factorial number: !k = 0! + 1! + ... + (k−1)!.",
+    oeis="A003422",
+    category=CATEGORY,
+)
+def is_left_factorial(n: int) -> tuple[bool, str]:
+    """
+    Check if n is a left factorial number.
+
+    !k = sum(i!, 0 <= i < k)
+    """
+    if n < 0:
+        return False, None
+
+    if n == 0:
+        return True, "0 = !0"
+
+    fact = 1      # 0!
+    left = 1      # !1
+
+    if n == 1:
+        return True, "1 = !1"
+
+    k = 1
+
+    while left < n:
+        k += 1
+        fact *= k - 1
+        left += fact
+
+    terms = " + ".join(f"{i}!" for i in range(k))
+    details = f"{n} = !{k} = {terms}"
+    
+    if left == n:
+        return True, details
+
+    return False, None
+
+
+def _leyland_max_exponent(n: int, x: int, digits: int) -> int:
+    """
+    Safe upper bound for y in x^y + y^x = n.
+
+    Since x^y <= n, we need y <= log_x(n).
+    Using decimal digits gives a safe overestimate:
+        log10(n) < digits(n)
+    """
+    return int(digits / math.log10(x)) + 1
+
+
+@classifier(
+    label="Leyland number",
+    description="Number of the form x^y + y^x with integers x, y > 1.",
+    oeis="A076980",
+    category=CATEGORY,
+    limit=10**1500 - 1,
+)
+def is_leyland_number(n: int) -> tuple[bool, str | None]:
+    if n < 8:
+        return False, None
+
+    digits = dec_digits(n)
+    matches: list[tuple[int, int]] = []
+
+    x = 2
+    while 2 * pow(x, x) <= n:
+        max_y = _leyland_max_exponent(n, x, digits)
+
+        for y in range(x, max_y + 1):
+            xy = pow(x, y)
+            if xy > n:
+                break
+
+            value = xy + pow(y, x)
+
+            if value == n:
+                matches.append((x, y))
+            elif value > n:
+                break
+
+        x += 1
+
+    if not matches:
+        return False, None
+
+    parts = [f"{x}^{y} + {y}^{x}" for x, y in matches]
+    return True, f"{n} = " + " = ".join(parts)
 
 
 @classifier(
@@ -461,6 +656,7 @@ def _prefixes_base10(n: int) -> list[int]:
     description="In base 10: for every k = 1..d, the first k digits form a number divisible by k.",
     oeis=None,  # optional: add OEIS if you like
     category=CATEGORY,
+    limit=10**50000-1
 )
 def is_polydivisible_number(n: int, ctx=None) -> tuple[bool, str | None]:
     """
@@ -584,6 +780,243 @@ def is_self_power_number(n: int) -> tuple[bool, str | None]:
             break
 
     return False, None
+
+
+@classifier(
+    label="Sierpiński candidate",
+    description="No prime n·2^k+1 was found within the configured exponent bound.",
+    oeis="A076336",
+    category=CATEGORY,
+    limit=10**400 - 1,
+)
+def is_sierpinski_candidate(n: int) -> tuple[bool, str | None]:
+    return _power_family_candidate(
+        n,
+        sign=+1,
+        name="Sierpiński",
+        smallest_known=78557,
+    )
+
+
+@classifier(
+    label="Riesel candidate",
+    description="No prime n·2^k−1 was found within the configured exponent bound.",
+    oeis="A101036",
+    category=CATEGORY,
+    limit=10**800 - 1,
+)
+def is_riesel_candidate(n: int) -> tuple[bool, str | None]:
+    return _power_family_candidate(
+        n,
+        sign=-1,
+        name="Riesel",
+        smallest_known=509203,
+    )
+
+
+def _power_family_candidate(
+    n: int,
+    *,
+    sign: int,
+    name: str,
+    smallest_known: int | None = None,
+) -> tuple[bool, str | None]:
+    """
+    Shared explorer for Sierpiński/Riesel-style families.
+
+    sign = +1: n·2^k + 1  (Sierpiński)
+    sign = -1: n·2^k − 1  (Riesel)
+
+    True means:
+      - no prime witness was found within MAX_EXP, and
+      - optionally a covering set may prove the full property.
+    False means:
+      - a prime witness was found, so n is not a candidate.
+    """
+    if n <= 1 or n % 2 == 0:
+        return False, None
+
+    max_exp = int(CFG("CLASSIFIER.POWER_FAMILY.MAX_EXP", 2000))
+    cover_prime_limit = int(CFG("CLASSIFIER.POWER_FAMILY.COVER_PRIME_LIMIT", 500))
+    cover_modulus_cap = int(CFG("CLASSIFIER.POWER_FAMILY.COVER_MODULUS_CAP", 5000))
+    cover_time_budget_s = float(CFG("CLASSIFIER.POWER_FAMILY.COVER_TIME_BUDGET_S", 1.0))
+
+    sign_text = "+" if sign > 0 else "−"
+
+    for k in range(1, max_exp + 1):
+        value = (n << k) + sign
+        if value > 1 and isprime(value):
+            return False, f"{n}·2^{k} {sign_text} 1 = {value} is prime."
+
+    cover = _find_power_family_covering_set(
+        n,
+        sign=sign,
+        prime_limit=cover_prime_limit,
+        modulus_cap=cover_modulus_cap,
+        time_budget_s=cover_time_budget_s,
+    )
+
+    if cover:
+        return True, _format_power_family_cover(
+            n,
+            cover,
+            sign=sign,
+            name=name,
+            smallest_known=smallest_known,
+        )
+
+    return True, (
+        f"No prime of the form {n}·2^k {sign_text} 1 was found "
+        f"for 1 ≤ k ≤ {max_exp}. "
+        f"No covering set was found within the configured limits "
+        f"(primes ≤ {cover_prime_limit}, modulus cap {cover_modulus_cap}, "
+        f"time budget {cover_time_budget_s:g}s). "
+        f"The {name} property remains unresolved."
+    )
+
+
+def _format_power_family_cover(
+    n: int,
+    cover: list[tuple[int, int, int]],
+    *,
+    sign: int,
+    name: str,
+    smallest_known: int | None,
+) -> str:
+    sign_text = "+" if sign > 0 else "−"
+    parts = ", ".join(f"{p}: k≡{r} (mod {m})" for p, r, m in cover)
+
+    if smallest_known is not None and n == smallest_known:
+        prefix = f"Smallest known / conjectured smallest {name} number. "
+    else:
+        prefix = f"{name} number proved by covering set. "
+
+    return (
+        prefix
+        + f"Covering set: {parts}. "
+        + f"Therefore {n}·2^k {sign_text} 1 is composite for every k ≥ 1."
+    )
+
+
+def _power_family_class_for_prime(
+    n: int,
+    p: int,
+    *,
+    sign: int,
+) -> tuple[int, int, int] | None:
+    """
+    Return (p, r, m), meaning:
+
+        k ≡ r (mod m) ⇒ p | n·2^k ± 1
+
+    sign = +1: solve n·2^k + 1 ≡ 0 (mod p)
+               so 2^k ≡ −n⁻¹ (mod p)
+
+    sign = -1: solve n·2^k − 1 ≡ 0 (mod p)
+               so 2^k ≡ n⁻¹ (mod p)
+    """
+    try:
+        target = (-sign * pow(n, -1, p)) % p
+        order = int(n_order(2, p))
+    except Exception:
+        return None
+
+    value = 1
+    for r in range(order):
+        if value == target:
+            return (p, r, order)
+        value = (value * 2) % p
+
+    return None
+
+
+def _find_power_family_covering_set(
+    n: int,
+    *,
+    sign: int,
+    prime_limit: int,
+    modulus_cap: int,
+    time_budget_s: float,
+) -> list[tuple[int, int, int]] | None:
+    t0 = perf_counter()
+
+    def timed_out() -> bool:
+        return (perf_counter() - t0) >= time_budget_s
+
+    classes: list[tuple[int, int, int]] = []
+
+    for p in primerange(3, prime_limit + 1):
+        if timed_out():
+            return None
+        if n % p == 0:
+            continue
+
+        cls = _power_family_class_for_prime(n, p, sign=sign)
+        if cls is not None:
+            classes.append(cls)
+
+    if not classes:
+        return None
+
+    for period in _candidate_cover_periods(classes, modulus_cap):
+        if timed_out():
+            return None
+
+        cover = _greedy_cover_for_period(classes, period)
+        if cover is not None:
+            return cover
+
+    return None
+
+
+def _candidate_cover_periods(
+    classes: list[tuple[int, int, int]],
+    modulus_cap: int,
+) -> list[int]:
+    periods = {1}
+
+    for _, _, m in classes:
+        new_periods = set()
+        for current in periods:
+            nxt = int(lcm(current, m))
+            if nxt <= modulus_cap:
+                new_periods.add(nxt)
+        periods |= new_periods
+
+    return sorted(p for p in periods if p > 1)
+
+
+def _greedy_cover_for_period(
+    classes: list[tuple[int, int, int]],
+    period: int,
+) -> list[tuple[int, int, int]] | None:
+    usable = [cls for cls in classes if period % cls[2] == 0]
+    if not usable:
+        return None
+
+    uncovered = set(range(period))
+    chosen: list[tuple[int, int, int]] = []
+
+    while uncovered:
+        best: tuple[int, int, int] | None = None
+        best_hits: set[int] = set()
+
+        for p, r, m in usable:
+            hits = {x for x in uncovered if x % m == r}
+            if len(hits) > len(best_hits):
+                best = (p, r, m)
+                best_hits = hits
+
+        if best is None or not best_hits:
+            return None
+
+        chosen.append(best)
+        uncovered -= best_hits
+
+        # Usually a covering set uses each prime once.
+        usable = [cls for cls in usable if cls[0] != best[0]]
+
+    return chosen
 
 
 @classifier(

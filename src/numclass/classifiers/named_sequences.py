@@ -247,7 +247,7 @@ def is_cullen_number(n: int) -> tuple[bool, str | None]:
 
         if mk == m:
             # Found exact k
-            return True, f"{n} = {k}·2^{k} + 1 (Cullen number with k = {k})."
+            return True, f"{abbr_int_fast(n)} = {k}·2^{k} + 1 (Cullen number with k = {k})."
 
         if mk < m:
             lo = k + 1
@@ -430,6 +430,7 @@ def is_keith_number(n: int) -> tuple[bool, str]:
     description="L₀=2, L₁=1, and Lₙ = Lₙ₋₁ + Lₙ₋₂ for n≥2.",
     oeis="A000032",
     category=CATEGORY,
+    limit=10**50000-1
 )
 def is_lucas_number(n: int) -> tuple[bool, str | None]:
     if n < 0:
@@ -495,7 +496,8 @@ def is_lucky_number(n: int) -> tuple[bool, str]:
     label="Padovan number",
     description="Defined by P(n)=P(n-2)+P(n-3), starting 1,1,1.",
     oeis="A000931",
-    category=CATEGORY
+    category=CATEGORY,
+    limit=10**30000-1
 )
 def is_padovan_number(n: int) -> tuple[bool, str]:
     """
@@ -521,7 +523,8 @@ def is_padovan_number(n: int) -> tuple[bool, str]:
     label="Pell number",
     description="P(n)=2P(n−1)+P(n−2), P(0)=0,P(1)=1.",
     oeis="A000129",
-    category=CATEGORY
+    category=CATEGORY,
+    limit=10**30000-1
 )
 def is_pell_number(n: int) -> tuple[bool, str]:
     """
@@ -653,7 +656,8 @@ def is_taxicab_number(n) -> tuple[bool, str]:
     label="Tribonacci number",
     description="Sum of preceding three numbers in its sequence, starting 0,0,1.",
     oeis="A000073",
-    category=CATEGORY
+    category=CATEGORY,
+    limit=10**50000-1
 )
 def is_tribonacci_number(n: int) -> tuple[bool, str]:
     """
@@ -780,7 +784,7 @@ def is_woodall_number(n: int) -> tuple[bool, str | None]:
         return False, None
     k = _k2k_equals(n + 1)
     if k is not None:
-        return True, f"n + 1 = {n+1} = {k}×2^{k}"
+        return True, f"n + 1 = {abbr_int_fast(n+1)} = {k}×2^{k}"
     return False, None
 
 

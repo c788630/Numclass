@@ -21,7 +21,15 @@ from pathlib import Path
 from time import perf_counter
 from typing import Any
 
-import gmpy2
+try:
+    import gmpy2
+    MPZ = gmpy2.mpz
+    HAVE_GMPY2 = True
+except Exception:
+    gmpy2 = None
+    MPZ = int
+    HAVE_GMPY2 = False
+
 from colorama import Fore, Style
 from sympy import factorint, isprime, lcm
 
@@ -189,7 +197,7 @@ def clear_screen(keep_scrollback: bool = False) -> None:
             pass
 
 
-def _read_text_from_workspace_or_package(name: str) -> str | None:
+def read_text_from_workspace_or_package(name: str) -> str | None:
     """Return text of a data file from workspace/data first, else from numclass.data, else None."""
     name = Path(name).name
     wp = workspace_dir() / "data" / name
@@ -400,15 +408,10 @@ def _too_big(x: int) -> bool:
     avoid expensive str(x) on huge integers.
     """
     bit_cap = int(CFG("FACTORING.BITLEN_CAP", 10000))  # ~3k decimal digits
-    digit_cap = int(CFG("FACTORING.DIGIT_CAP", 0))     # 0 = disabled
 
     # Hard cap on bit length
     if x.bit_length() > bit_cap:
         return True
-
-    # Optional decimal-digit cap
-    if digit_cap:
-        return dec_digits(x) > digit_cap
 
     return False
 
@@ -484,7 +487,6 @@ def _factor(n: int, *, max_time_s: float | None = None) -> dict[int, int]:
     • **DIGIT_CAP / BITLEN_CAP safety gates**
       The early helper ``_too_big(n)`` applies:
           - ``FACTORING.BITLEN_CAP`` (default: 10M bits), and
-          - ``FACTORING.DIGIT_CAP`` (default: 0 = disabled).
       If either limit is exceeded, we immediately return ``{n: 1}`` without
       attempting any factoring.
 
@@ -712,7 +714,7 @@ def _known_mersenne_prime_exponents() -> set[int]:
     # --- from special_inputs.tsv --------------------------------------------
     # file is tab-delimited and has a commented header starting with '#'.
     try:
-        txt = _read_text_from_workspace_or_package("special_inputs.tsv")
+        txt = read_text_from_workspace_or_package("special_inputs.tsv")
     except Exception:
         txt = ""
     _EXPECTED_COLS = 2
@@ -758,20 +760,19 @@ def build_ctx(n: int) -> NumCtx:
     incomplete = False
 
     if n != 0:
-        decdigits = dec_digits(n)
+        fac = _factor(n)
 
-        stats_digit_limit = int(CFG("FACTORING.DIGIT_CAP", 5_000))
-
-        # Too big for general σ/τ in stats: don't even try factoring.
-        if decdigits > stats_digit_limit:
+        if has_composite_base(fac):
             incomplete = True
-        else:
-            # Let the factoring pipeline apply BITLEN_CAP, DIGIT_CAP, timeouts, etc.
-            fac = _factor(n)
-            # If factorization left composite bases, treat as incomplete
-            if has_composite_base(fac):
-                incomplete = True
-                comps = _composite_bases(fac)
+            comps = _composite_bases(fac)
+
+        # Final consistency guard
+        # A proven prime always has the complete factorization {n: 1},
+        # regardless of factoring limits or timeouts.
+        if n > 1 and ctx_isprime(n):
+            fac = {n: 1}
+            incomplete = False
+            comps = ()
 
     if n == 0:
         pass
@@ -803,7 +804,7 @@ def build_ctx(n: int) -> NumCtx:
 @lru_cache(maxsize=128)
 def _isprime_lru(n: int) -> bool:
     """Process-wide cache for primality of n."""
-    return isprime(int(n))
+    return isprime(n)
 
 
 def ctx_isprime(n: int, ctx: NumCtx | None = None) -> bool:
@@ -1455,22 +1456,38 @@ def sigma_with_parts(fac: dict[int, int]) -> tuple[int, list[tuple[int, int, int
 
 
 def _sigma_from_factors(fac: dict[int, int]) -> int:
-    """σ(n) = ∏ (p^(a+1) − 1)/(p − 1) using gmpy2 bigints."""
-    acc = gmpy2.mpz(1)
+    """σ(n) = ∏ (p^(a+1) − 1)/(p − 1)."""
+
+    if HAVE_GMPY2:
+        acc = gmpy2.mpz(1)
+        for p, a in fac.items():
+            pz = gmpy2.mpz(p)
+            num = pow(pz, a + 1) - 1
+            den = pz - 1
+            acc *= num // den
+        return int(acc)
+
+    acc = 1
     for p, a in fac.items():
-        pz = gmpy2.mpz(p)
-        num = pow(pz, a + 1) - 1        # p^(a+1) - 1
-        den = pz - 1
+        num = pow(p, a + 1) - 1
+        den = p - 1
         acc *= num // den
-    return int(acc)
+    return acc
 
 
 def _usigma_from_factors(fac: dict[int, int]) -> int:
-    """σ*(n) = ∏ (1 + p^a) using gmpy2 bigints."""
-    acc = gmpy2.mpz(1)
+    """σ*(n) = ∏ (1 + p^a)."""
+
+    if HAVE_GMPY2:
+        acc = gmpy2.mpz(1)
+        for p, a in fac.items():
+            acc *= 1 + pow(gmpy2.mpz(p), a)
+        return int(acc)
+
+    acc = 1
     for p, a in fac.items():
-        acc *= 1 + pow(gmpy2.mpz(p), a)  # p^a
-    return int(acc)
+        acc *= 1 + pow(p, a)
+    return acc
 
 
 @lru_cache(maxsize=100_000)

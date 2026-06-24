@@ -218,20 +218,20 @@ def _try_k_eq_2_via_divisors(n: int, ctx: NumCtx, max_divisors: int = 5000) -> s
 
 @classifier(
     label="Automorphic number",
-    description="a number whose square ends with the number itself (n >= 0)",
+    description="A number whose square ends with the number itself.",
     oeis="A003226",
-    category=CATEGORY
+    category=CATEGORY,
 )
-def is_automorphic_number(n: int) -> tuple[bool, str]:
-    """
-    Check if n is an automorphic number.
-    """
+def is_automorphic_number(n: int) -> tuple[bool, str | None]:
     if n < 0:
         return False, None
-    sq = n * n
-    s, s_sq = str(n), str(sq)
-    if s_sq.endswith(s):
-        return True, f"{n}² = {sq} ends with {n}."
+
+    d = dec_digits(n)
+    modulus = 10 ** d
+
+    if (n * n) % modulus == n:
+        return True, f"{abbr_int_fast(n)}² ends with {abbr_int_fast(n)}."
+
     return False, None
 
 
@@ -815,6 +815,27 @@ def is_palindrome(n: int) -> tuple[bool, str]:
         details = f"{n} reads the same forwards and backwards: {s}."
         return True, details
     return False, None
+
+
+@classifier(
+    label="Pernicious number",
+    description="The number of 1 bits in the binary representation is prime.",
+    oeis="A052294",
+    category=CATEGORY,
+)
+def is_pernicious_number(n: int) -> tuple[bool, str]:
+    if n < 0:
+        return False, None
+
+    ones = n.bit_count()
+
+    if not isprime(ones):
+        return False, None
+
+    return True, (
+        f"Binary representation contains {ones} one"
+        f"{'' if ones == 1 else 's'}; {ones} is prime."
+    )
 
 
 @classifier(

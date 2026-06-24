@@ -141,6 +141,7 @@ def is_carmichael_number(n: int, ctx: NumCtx | None = None) -> tuple[bool, str |
     description="Number of the form a^b ± 1 with a, b ≥ 2.",
     oeis="A080262",
     category=CATEGORY,
+    limit=10**50000-1
 )
 def is_cunningham_number(n: int, ctx: NumCtx | None = None) -> tuple[bool, str | None]:
     if n <= 2:

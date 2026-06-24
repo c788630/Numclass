@@ -194,8 +194,9 @@ def is_circular_prime(n: int) -> tuple[bool, str]:
 @classifier(
     label="Cousin prime",
     description="Prime with another prime 4 away.",
-    oeis="A046132",  # smaller member, A046132 for larger mmber
-    category=CATEGORY
+    oeis="A046132",  # smaller member, A046132 for larger member
+    category=CATEGORY,
+    limit=10**10000-1
 )
 def is_cousin_prime(n: int, ctx: NumCtx | None = None) -> tuple[bool, str]:
     """
@@ -207,10 +208,10 @@ def is_cousin_prime(n: int, ctx: NumCtx | None = None) -> tuple[bool, str]:
     if not ctx_isprime(n, ctx):
         return False, None
     if isprime(n - 4):
-        details = f"{n} and {n-4} are cousin primes (differ by 4)."
+        details = f"{abbr_int_fast(n)} and {abbr_int_fast(n-4)} are cousin primes (differ by 4)."
         return True, details
     if isprime(n + 4):
-        details = f"{n} and {n+4} are cousin primes (differ by 4)."
+        details = f"{abbr_int_fast(n)} and {abbr_int_fast(n+4)} are cousin primes (differ by 4)."
         return True, details
     return False, None
 
@@ -219,7 +220,8 @@ def is_cousin_prime(n: int, ctx: NumCtx | None = None) -> tuple[bool, str]:
     label="emirp",
     description="Prime that is a different prime when reversed.",
     oeis="A006567",
-    category=CATEGORY
+    category=CATEGORY,
+    limit=10**50000-1
 )
 def is_emirp(n: int, ctx: NumCtx | None = None) -> tuple[bool, str]:
     """
@@ -409,7 +411,8 @@ def is_good_prime_local(n: int, ctx: NumCtx | None = None) -> tuple[bool, str | 
     label="Isolated prime",
     description="Prime number that is not part of a twin prime pair (n-2 and n+2 are not prime).",
     oeis="A007510",
-    category=CATEGORY
+    category=CATEGORY,
+    limit=10**5000-1
 )
 def is_isolated_prime(n: int, ctx: NumCtx | None = None) -> tuple[bool, str]:
     """
@@ -813,7 +816,8 @@ def is_safe_prime(n: int, ctx: NumCtx | None = None) -> tuple[bool, str]:
     label="Sexy prime",
     description="Prime with another prime 6 away.",
     oeis="A023201",
-    category=CATEGORY
+    category=CATEGORY,
+    limit=10**5000-1
 )
 def is_sexy_prime(n: int, ctx: NumCtx | None = None) -> tuple[bool, str]:
     """
@@ -1015,7 +1019,7 @@ def is_thin_prime(n: int, ctx: NumCtx | None = None) -> tuple[bool, str | None]:
     description="Prime with another prime 2 away.",
     oeis="A001359",  # lessor of twin primes, A006512 greater of twin primes.
     category=CATEGORY,
-    limit=10**20-1
+    limit=10**50-1
 )
 def is_twin_prime(n: int, ctx: NumCtx | None = None) -> tuple[bool, str]:
     """

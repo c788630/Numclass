@@ -90,7 +90,7 @@ def ensure_runtime_deps(strict: bool = True) -> bool:
     inside this function (satisfies PLC0415).
     If strict=True, prints a friendly error and returns False when missing.
     """
-    required = ("sympy", "gmpy2")
+    required = ("sympy",)
     missing = [name for name in required if find_spec(name) is None]
 
     if not missing:

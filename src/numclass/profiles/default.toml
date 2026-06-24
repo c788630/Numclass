@@ -37,7 +37,6 @@ MAX_DIGITS                      = 100_000
 
 [FACTORING]
 BITLEN_CAP                      = 10_000_000
-DIGIT_CAP                       = 5_000
 MAX_TIME_S                      = 5.0
 SMALL_DIGIT_THRESHOLD           = 80
 STEP_LIMITS                     = [1000, 10_000, 100_000, 1_000_000]
@@ -148,6 +147,13 @@ MAX_INDEX              = 10_000
 [CLASSIFIER.MOTZKIN]
 # from is_motzkin_number in combinatorial_geometric.py
 MAX_K                  = 200_000
+
+[CLASSIFIER.POWER_FAMILY]
+MAX_EXP                = 2000
+TRY_COVERING_SET       = true
+COVER_PRIME_LIMIT      = 500
+COVER_MODULUS_CAP      = 5000
+COVER_TIME_BUDGET_S    = 1
 
 [CLASSIFIER.PRIMORIAL]
 MAX_DIGITS             = 200

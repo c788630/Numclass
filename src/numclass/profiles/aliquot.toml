@@ -9,7 +9,7 @@ description = "Focus on aliquot theory: σ/τ stats, aliquot/quasi/unitary chain
 "Combinatorial and Geometric"            = false
 "Conjectures and Equation-based"         = false
 "Digit-based"                            = false
-"Diophantine representations"            = false
+"Diophantine Representations"            = false
 "Dynamical Sequences"                    = false
 "Fun numbers"                            = false
 "Mathematical Curiosities"               = false
@@ -38,7 +38,6 @@ MAX_DIGITS                      = 100_000
 
 [FACTORING]
 BITLEN_CAP                      = 10_000_000
-DIGIT_CAP                       = 5000
 SMALL_DIGIT_THRESHOLD           = 100
 MAX_TIME_S                      = 2.0
 STEP_LIMITS                     = [1000, 10_000, 100_000, 1_000_000]

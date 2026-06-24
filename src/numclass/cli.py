@@ -61,6 +61,7 @@ from numclass.runtime import APPLY, CFG, ensure_runtime_deps
 from numclass.runtime import current as _rt_current
 from numclass.utility import (
     UserInputError,
+    HAVE_GMPY2,
     build_ctx,
     clear_screen,
     flatten_dotted,
@@ -292,7 +293,14 @@ def _main_impl(argv=None) -> int:
 
     if args.debug:
         print()
-        print(f"Terminal {get_terminal_width()}x{get_terminal_height()}")
+        print(f"[runtime] Terminal {get_terminal_width()}x{get_terminal_height()}")
+        status = (
+            f"{Fore.GREEN}enabled{Style.RESET_ALL}"
+            if HAVE_GMPY2
+            else f"{Fore.YELLOW}disabled{Style.RESET_ALL}"
+        )
+
+        print(f"[runtime] gmpy2 accelerator: {status}", file=sys.stderr)
         index, rep = discover_with_report(workspace_dir())
         # atomic summary
         print(f"[debug] discovered atomic: {len(index.funcs)}", file=sys.stderr)

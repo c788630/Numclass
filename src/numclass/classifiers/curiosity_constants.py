@@ -10,7 +10,7 @@ import re
 from collections.abc import Callable
 
 from numclass.registry import classifier
-from numclass.utility import _read_text_from_workspace_or_package
+from numclass.utility import read_text_from_workspace_or_package
 
 CATEGORY = "Mathematical Curiosities"
 DATA_FILE = "curiosity_constants.tsv"
@@ -32,7 +32,7 @@ def _parse_int_list(s: str) -> set[int]:
 
 
 def _load_rows() -> list[dict[str, str]]:
-    txt = _read_text_from_workspace_or_package(DATA_FILE)
+    txt = read_text_from_workspace_or_package(DATA_FILE)
     if not txt:
         return []
 

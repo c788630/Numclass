@@ -778,6 +778,7 @@ def is_semiperfect_number(
     description="An integer of the form m^k with m>1, k>1 (square, cube, …).",
     oeis="A001597",
     category=CATEGORY,
+    limit=10**50000-1
 )
 def is_perfect_power(n: int) -> tuple[bool, str | None]:
     """

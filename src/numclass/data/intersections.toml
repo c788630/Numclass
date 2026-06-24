@@ -89,6 +89,13 @@ description = "Prime divisible by the sum of its digits."
 # oeis intentionally omitted
 
 [[intersections]]
+of = ["Prime number", "Leyland number"]
+label = "Leyland prime"
+category = "Primes and Prime-related Numbers"
+description = "Prime number of the form x^y + y^x with integers x, y > 1."
+oeis = "A094133"
+
+[[intersections]]
 of = ["Prime number", "Lucas number"]
 label = "Lucas prime"
 category = "Primes and Prime-related Numbers"
