@@ -435,11 +435,7 @@ def print_statistics(n: int, user_input: str, show_details: bool = True, om=None
         # Only pay for prime neighbors when small enough
         p_lo = prevprime(n) if n > _SMALLEST_PRIME else None
         p_hi = nextprime(n)
-
-        if p_lo is not None:
-            msg = f"{prime_str}, nearest primes: ◀{p_lo} ▶{p_hi}"
-        else:
-            msg = f"No, nearest prime: ▶{p_hi}"
+        msg = f"{prime_str}, nearest primes: ◀{p_lo} ▶{p_hi}" if p_lo is not None else f"No, nearest prime: ▶{p_hi}"
 
         # Only calculate/display π(x) and prime density when cheap enough
         if n <= _MAX_PRIME_PI_N:
@@ -519,7 +515,7 @@ def print_statistics(n: int, user_input: str, show_details: bool = True, om=None
             abs_n,
             factors=factors,
             return_factors=True,
-)
+        )
         # Handle huge numbers where factorization was skipped and
         # ctx.fac == {} → no partial factors to display.
         if not used_factors:
@@ -998,7 +994,7 @@ def show_classifier_list(index, paged: bool = True) -> None:
                 lines.append(left)
         lines.append("")  # blank line between categories
 
-    atomic = len(index.funcs) - 1
+    atomic = len(index.funcs)
     intersections = len(getattr(index, 'intersections', []) or [])
     title = (f"{Fore.YELLOW}Available classifiers: {atomic} atomic + {intersections} "
              f"intersections = {atomic + intersections}{Style.RESET_ALL}")
@@ -1702,6 +1698,6 @@ def print_profiles_with_descriptions() -> None:
 
     lines = []
     for name, desc in pairs:
-        mark = "🡆" if current and name == current else " "
+        mark = "▷" if current and name == current else " "
         lines.append(f"{mark} {name:13} — {desc}")
     print("\nAvailable profiles:\n  " + "\n  ".join(lines))

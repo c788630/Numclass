@@ -6,7 +6,7 @@ from importlib.resources import as_file
 from importlib.resources import files as pkg_files
 from pathlib import Path
 
-SUBDIRS = ("profiles", "data", "classifiers")
+SUBDIRS = ("profiles", "data", "classifiers", "inputs")
 
 
 def workspace_dir() -> Path:
@@ -54,17 +54,22 @@ def _copy_tree(src: Path, dst: Path, *, overwrite: bool, sub: str) -> int:
     return count
 
 
-def seed_workspace(*, overwrite: bool = False, subsets: set[str] | None = None) -> tuple[Path, dict[str, int]]:
+def seed_workspace(
+    *,
+    overwrite: bool = False,
+    subsets: set[str] | None = None,
+) -> tuple[Path, dict[str, int]]:
     """
     Copy packaged sample files into the user's workspace.
 
     overwrite=False → copy-if-missing (normal users)
     overwrite=True  → force replace (dev use, guarded in CLI)
-    subsets: optional subset of {"profiles","data","classifiers"} to limit copying
+    subsets: optional subset of {"profiles", "data", "classifiers", "inputs"} to limit copying
 
     Returns: (workspace_path, {section: files_copied})
     """
     root = workspace_dir()
+
     for sub in SUBDIRS:
         (root / sub).mkdir(parents=True, exist_ok=True)
 
@@ -72,10 +77,19 @@ def seed_workspace(*, overwrite: bool = False, subsets: set[str] | None = None) 
     copied = {k: 0 for k in SUBDIRS}
 
     for sub in parts:
+        if sub not in SUBDIRS:
+            continue
+
         ref = pkg_files("numclass") / sub
+
         try:
             with as_file(ref) as real:
-                copied[sub] = _copy_tree(Path(real), root / sub, overwrite=overwrite, sub=sub)
+                copied[sub] = _copy_tree(
+                    Path(real),
+                    root / sub,
+                    overwrite=overwrite,
+                    sub=sub,
+                )
         except Exception:
             copied[sub] = 0
 

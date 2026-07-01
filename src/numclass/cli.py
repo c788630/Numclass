@@ -30,6 +30,7 @@ import argparse
 import faulthandler
 import os
 import platform
+import struct
 import sys
 import textwrap
 import threading
@@ -59,9 +60,10 @@ from numclass.registry import (  # may raise if not present in older versions
 )
 from numclass.runtime import APPLY, CFG, ensure_runtime_deps
 from numclass.runtime import current as _rt_current
+from numclass.transform import get_transforms
 from numclass.utility import (
-    UserInputError,
     HAVE_GMPY2,
+    UserInputError,
     build_ctx,
     clear_screen,
     flatten_dotted,
@@ -293,7 +295,14 @@ def _main_impl(argv=None) -> int:
 
     if args.debug:
         print()
-        print(f"[runtime] Terminal {get_terminal_width()}x{get_terminal_height()}")
+        print(f"[runtime] Platform: {platform.platform()}")
+        print(
+            f"[runtime] Python: {platform.python_version()} "
+            f"({sys.platform}, {struct.calcsize('P') * 8}-bit)"
+        )
+        if sys.platform == "ios":
+            print("[runtime] Multiprocessing timeout disabled on iOS/iPadOS")
+        print(f"[runtime] Terminal size: {get_terminal_width()}x{get_terminal_height()}")
         status = (
             f"{Fore.GREEN}enabled{Style.RESET_ALL}"
             if HAVE_GMPY2
@@ -302,8 +311,7 @@ def _main_impl(argv=None) -> int:
 
         print(f"[runtime] gmpy2 accelerator: {status}", file=sys.stderr)
         index, rep = discover_with_report(workspace_dir())
-        # atomic summary
-        print(f"[debug] discovered atomic: {len(index.funcs)}", file=sys.stderr)
+
         # workspace modules
         for name, cnt in rep.ws_loaded:
             print(f"[discovery] {Fore.GREEN}ws OK{Style.RESET_ALL} {name}: {cnt} label(s)", file=sys.stderr)
@@ -316,8 +324,19 @@ def _main_impl(argv=None) -> int:
                 file=sys.stderr
             )
 
+        # atomic summary
+        print(f"[discovery] Atomic classifiers discovered: {len(index.funcs)}", file=sys.stderr)
         # intersections count
-        print(f"[discovery] intersections OK: {len(index.intersections)} from {data_path('intersections.toml')}", file=sys.stderr)
+        print(f"[discovery] Intersections OK: {len(index.intersections)} from {data_path('intersections.toml')}", file=sys.stderr)
+        # input transforms loaded
+        transforms = get_transforms()
+
+        print(
+            "[discovery] Input transformations loaded: "
+            + (", ".join(transforms) if transforms else "None"),
+            file=sys.stderr,
+        )
+
     else:
         index = discover(workspace_dir())
 
@@ -333,16 +352,26 @@ def _main_impl(argv=None) -> int:
             if os.environ.get("NUMCLASS_DEV") != "1":
                 print("Refusing to overwrite: set NUMCLASS_DEV=1 to enable developer overwrite.")
                 return 2
-            ws, copied = seed_workspace(overwrite=True)  # overwrite all three: profiles, data, classifiers
+            ws, copied = seed_workspace(overwrite=True)
             print(f"Workspace ready at: {ws} (overwrote existing files)")
-            print(f"Copied -> profiles: {copied.get('profiles', 0)}, "
-                  f"data: {copied.get('data', 0)}, classifiers: {copied.get('classifiers', 0)}")
+
+            sections = ", ".join(
+                f"{name}: {copied.get(name, 0)}"
+                for name in ("profiles", "data", "classifiers", "inputs")
+            )
+
+            print(f"Copied -> {sections}")
             return 0
 
         ws, seeded, copied = ensure_workspace_seeded()  # copy-if-missing
         print(f"Workspace ready at: {ws}")
-        print(f"Copied -> profiles: {copied.get('profiles', 0)}, data: {copied.get('data', 0)}, "
-              f"classifiers: {copied.get('classifiers', 0)}")
+        sections = ", ".join(
+            f"{name}: {count}"
+            for name, count in copied.items()
+        )
+
+        print(f"Copied -> {sections}")
+
         return 0
 
     if profile == "list":

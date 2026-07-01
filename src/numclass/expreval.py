@@ -7,8 +7,6 @@ import random
 import re
 from dataclasses import dataclass
 from decimal import Decimal, getcontext
-from importlib.resources import files as pkg_files
-from pathlib import Path
 
 from colorama import Fore, Style
 
@@ -19,7 +17,6 @@ except Exception:
     TransformNotApplicable = None
 
 from numclass.utility import CFG, UserInputError, clear_screen, dec_digits, read_text_from_workspace_or_package
-from numclass.workspace import workspace_dir
 
 # ---- simple number parsing helpers (keep original behavior) ----
 _THIN_SPACES = ("\u2009", "\u202F", "\u00A0")  # thin, narrow no-break, no-break
@@ -253,7 +250,21 @@ def _special_handler(key: str, handler: str, index: str, description: str, digit
             lines.append("  Prime:                Yes")
             # Digital root of Mersenne primes M_p = 2^p - 1
             # p_int > 3 prime implies p ≡ 1 or 5 (mod 6)
-            dr = 3 if p_int == 2 else 7 if p_int == 3 else (1 if p_int % 6 == 1 else 4)
+            _SMALL_MERSENNE_EXP_2 = 2
+            _SMALL_MERSENNE_EXP_3 = 3
+            _PRIME_MODULUS = 6
+
+            _MERSENNE_DIGITAL_ROOT = {
+                2: 3,  # M2 = 3
+                3: 7,  # M3 = 7
+                1: 1,  # p ≡ 1 (mod 6)
+                5: 4,  # p ≡ 5 (mod 6)
+            }
+
+            if p_int in (_SMALL_MERSENNE_EXP_2, _SMALL_MERSENNE_EXP_3):
+                dr = _MERSENNE_DIGITAL_ROOT[p_int]
+            else:
+                dr = _MERSENNE_DIGITAL_ROOT[p_int % _PRIME_MODULUS]
             lines.append(f"  Digital root of |n|:  {dr}")
             lines.append("")
             lines.append(f"{Fore.CYAN + Style.BRIGHT}Digit-based{Style.RESET_ALL}")
@@ -749,6 +760,22 @@ def _has_left_operand(expr: str, bang_pos: int) -> bool:
     return j >= 0 and (expr[j] == ")" or _is_token_char(expr[j]))
 
 
+_FACTORIAL_MARK = "!"
+_FACTORIAL_FUNC_BY_OP_LEN = {
+    1: _FAKE_FACT,
+    2: _FAKE_DFACT,
+}
+_MIN_FACTORIAL_OP_LEN = 1
+_MAX_FACTORIAL_OP_LEN = 2
+
+
+def _factorial_op_len(expr: str, i: int, n: int) -> int:
+    """Return postfix factorial operator length at position i: ! or !!."""
+    if i + _MIN_FACTORIAL_OP_LEN < n and expr[i + _MIN_FACTORIAL_OP_LEN] == _FACTORIAL_MARK:
+        return _MAX_FACTORIAL_OP_LEN
+    return _MIN_FACTORIAL_OP_LEN
+
+
 def _rewrite_postfix_factorials(expr: str) -> str:
     """
     Rewrite postfix factorial operators:
@@ -766,28 +793,30 @@ def _rewrite_postfix_factorials(expr: str) -> str:
     i = 0
 
     while i < n:
-        if expr[i] != "!" or not _has_left_operand(expr, i):
+        if expr[i] != _FACTORIAL_MARK or not _has_left_operand(expr, i):
             i += 1
             continue
 
-        op_len = 2 if i + 1 < n and expr[i + 1] == "!" else 1
+        op_len = _factorial_op_len(expr, i, n)
         operand_start, operand_end = _find_left_operand(expr, i)
 
         if operand_start < pos:
             raise _IntExprError("nested factorial operators are not supported")
 
+        next_pos = i + op_len
+
         # Reject 3!!! as ambiguous: is it (3!!)! or (3!)!! ?
-        if i + op_len < n and expr[i + op_len] == "!":
+        if next_pos < n and expr[next_pos] == _FACTORIAL_MARK:
             raise _IntExprError("chained factorial operators are not supported")
 
-        func = _FAKE_DFACT if op_len == 2 else _FAKE_FACT
+        func = _FACTORIAL_FUNC_BY_OP_LEN[op_len]
         operand_text = expr[operand_start:operand_end]
 
         out.append(expr[pos:operand_start])
         out.append(f"{func}({operand_text})")
 
-        pos = i + op_len
-        i = pos
+        pos = next_pos
+        i = next_pos
 
     out.append(expr[pos:])
     return "".join(out)

@@ -35,6 +35,8 @@ BITLEN_CAP                      = 10_000_000
 MAX_TIME_S                      = 2.0
 STEP_LIMITS                     = [1000, 10_000, 100_000, 1_000_000]
 USE_ECM                         = false
+NOFORK_DIGIT_CAP                = 120
+NOFORK_LIMIT_CAP                = 10000
 
 [DISPLAY_SETTINGS]
 DIVISOR_PRINT_LIMIT             = 250

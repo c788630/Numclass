@@ -20,9 +20,18 @@ if TYPE_CHECKING:
 from numclass.fmt import abbr_int_fast, format_factorization
 from numclass.registry import classifier
 from numclass.runtime import CFG
-from numclass.utility import build_ctx, check_oeis_bfile, dec_digits, get_ordinal_suffix, int_to_words, read_text_from_workspace_or_package, zeckendorf_decomposition
+from numclass.utility import (
+    build_ctx,
+    check_oeis_bfile,
+    dec_digits,
+    get_ordinal_suffix,
+    int_to_words,
+    read_text_from_workspace_or_package,
+    zeckendorf_decomposition,
+)
 
 CATEGORY = "Mathematical Curiosities"
+
 
 @classifier(
     label="Additive sequence",
@@ -260,13 +269,14 @@ def is_fibonacci_base_palindrome(n: int, ctx: NumCtx | None = None) -> tuple[boo
 
 GRAHAM_DIGIT_LIMIT = 10_000
 
+
 @lru_cache(maxsize=1)
 def _load_graham_last_digits() -> str:
 
-    text = read_text_from_workspace_or_package("graham_last_10000.txt")
+    text = read_text_from_workspace_or_package("graham_last_digits.txt")
     if text is None:
         return None
-    
+
     digits = "".join(ch for ch in text if ch.isdigit())
 
     if not digits:
@@ -290,7 +300,7 @@ def is_grahams_number_suffix(n: int) -> tuple[bool, str | None]:
 
     s = str(n)
     digits = _load_graham_last_digits()
-    
+
     if digits is None:
         return False, None
 
@@ -458,7 +468,7 @@ def is_left_factorial(n: int) -> tuple[bool, str]:
 
     terms = " + ".join(f"{i}!" for i in range(k))
     details = f"{n} = !{k} = {terms}"
-    
+
     if left == n:
         return True, details
 

@@ -61,7 +61,7 @@ stop	egg		Stopping would violate the laws of mathematical motion. Classification
 sudo	egg		Permission denied.		
 test	egg		Running self-diagnostics...		CPU: OK;Memory: OK;Number theory: OK;Sense of humor: WARNING;No problems detected.
 tohuvavohu	egg		Input is without shape or void — no valid integer formed.		
-version	egg		Numclass v2.1.1 — classifying the universe, one integer at a time.		
+version	egg		Numclass v2.2.0 — classifying the universe, one integer at a time.		
 wargames	egg		Shall we Play a game?		
 wopr	egg		Shall we Play a game?		
 xyzzy	egg		Nothing happens.		

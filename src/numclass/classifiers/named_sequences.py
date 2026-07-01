@@ -582,6 +582,7 @@ def is_prime_count_landmark(n: int) -> tuple[bool, str]:
         f"({10**k:,})."
     )
 
+
 @classifier(
     label="Taxicab number",
     description="Can be written as a sum of two positive cubes in at least two ways. (Also called a Hardy-Ramanujan number.)",

@@ -588,13 +588,13 @@ def is_harshad_number(n: int) -> tuple[bool, str | None]:
         return False, None
 
     digit_sum = sum(int(d) for d in str(n))  # n is already ≥ 1, so abs() not needed
-    
+
     # digit_sum cannot be 0 here, but also keep the guard for safety / future variants.
     if digit_sum == 0 or n % digit_sum != 0:
         return False, None
 
     q = n // digit_sum
-    
+
     details = (
         f"{abbr_int_fast(n)} is divisible by the sum of its digits: {abbr_int_fast(n)} "
         f"÷ {abbr_int_fast(digit_sum)} = {abbr_int_fast(q)}."

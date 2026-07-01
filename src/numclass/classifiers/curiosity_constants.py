@@ -16,6 +16,30 @@ CATEGORY = "Mathematical Curiosities"
 DATA_FILE = "curiosity_constants.tsv"
 
 
+def _register_curiosity_constant(row: dict[str, str], i: int) -> None:
+    label = (row.get("label") or "").strip()
+    n_field = (row.get("n") or "").strip()
+    desc = (row.get("description") or "").strip()
+    details = (row.get("details") or "").strip()
+    oeis = (row.get("oeis") or "").strip() or None
+
+    values = _parse_int_list(n_field)
+    checker = _make_checker(values, details)
+
+    checker.__name__ = "is_" + _safe_ident(label, i)
+    checker.__doc__ = desc or f"Data-driven curiosity constant: {label}"
+
+    decorated = classifier(
+        label=label,
+        category=CATEGORY,
+        description=desc,
+        oeis=oeis,
+    )(checker)
+
+    # Export name into module globals so discovery sees it as a top-level callable.
+    globals()[decorated.__name__] = decorated
+
+
 def _safe_ident(label: str, i: int) -> str:
     # Create a stable, import-safe python identifier.
     # Example: "Kaprekar Constant (4 digit)" -> "kaprekar_constant_4_digit_03"
@@ -90,25 +114,4 @@ def _make_checker(values: set[int], details: str | None) -> Callable[[int, objec
 # --- register one classifier per TSV row -------------------------------------
 
 for i, row in enumerate(_load_rows(), start=1):
-    label = (row.get("label") or "").strip()
-    n_field = (row.get("n") or "").strip()
-    desc = (row.get("description") or "").strip()
-    details = (row.get("details") or "").strip()
-    oeis = (row.get("oeis") or "").strip() or None
-
-    values = _parse_int_list(n_field)
-    fn = _make_checker(values, details)
-
-    fn.__name__ = "is_" + _safe_ident(label, i)
-    fn.__doc__ = desc or f"Data-driven curiosity constant: {label}"
-
-    # Register in index
-    fn = classifier(
-        label=label,
-        category=CATEGORY,
-        description=desc,
-        oeis=oeis,
-    )(fn)
-
-    # Export name into module globals so discovery sees it as a top-level callable
-    globals()[fn.__name__] = fn
+    _register_curiosity_constant(row, i)

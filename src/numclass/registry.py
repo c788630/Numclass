@@ -173,7 +173,7 @@ def discover(workspace: Path | None = None) -> Index:
     return idx
 
 
-def discover_with_report(workspace: Path | None = None) -> tuple[Index, list[str]]:
+def discover_with_report(workspace: Path | None = None) -> tuple[Index, DiscoveryReport]:
     """Discover classifiers with a detailed report (loaded, failed, skipped)."""
     report = DiscoveryReport()
 

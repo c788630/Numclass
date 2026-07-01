@@ -408,15 +408,52 @@ def _too_big(x: int) -> bool:
     avoid expensive str(x) on huge integers.
     """
     bit_cap = int(CFG("FACTORING.BITLEN_CAP", 10000))  # ~3k decimal digits
-
-    # Hard cap on bit length
-    if x.bit_length() > bit_cap:
-        return True
-
-    return False
+    return x.bit_length() > bit_cap
 
 
-def _factorint_bounded(n: int, *, limit: int | None, use_ecm: bool, max_time_s: float) -> dict[int, int] | None:
+def _is_ios() -> bool:
+    return sys.platform == "ios"
+
+
+def _can_use_process_timeout() -> bool:
+    # iOS/a-Shell crashes at Process.start(), so never probe it here.
+    return not _is_ios()
+
+
+def _factorint_bounded(
+    n: int,
+    *,
+    limit: int | None,
+    use_ecm: bool,
+    max_time_s: float,
+) -> dict[int, int] | None:
+    """
+    Factor n with a wall-clock bound where possible.
+
+    On normal desktop Python this uses a subprocess, so factorint can be killed
+    safely on timeout.
+
+    On iOS/a-Shell multiprocessing/fork is unsafe, so we use a conservative
+    in-process fallback. This cannot hard-kill factorint, so it only allows
+    small bounded attempts and otherwise returns None.
+    """
+    if not _can_use_process_timeout():
+        return _factorint_bounded_nofork(
+            n,
+            limit=limit,
+            use_ecm=use_ecm,
+            max_time_s=max_time_s,
+        )
+
+    return _factorint_bounded_process(
+        n,
+        limit=limit,
+        use_ecm=use_ecm,
+        max_time_s=max_time_s,
+    )
+
+
+def _factorint_bounded_process(n: int, *, limit: int | None, use_ecm: bool, max_time_s: float) -> dict[int, int] | None:
     """
     Run factorint(n, limit=..., use_ecm=...) in a subprocess and enforce
     a hard wall-clock timeout. Returns:
@@ -448,6 +485,42 @@ def _factorint_bounded(n: int, *, limit: int | None, use_ecm: bool, max_time_s: 
     return res
 
 
+def _factorint_bounded_nofork(
+    n: int,
+    *,
+    limit: int | None,
+    use_ecm: bool,
+    max_time_s: float,
+) -> dict[int, int] | None:
+    """
+    Safe no-fork fallback for iOS/a-Shell.
+
+    Important:
+    - No hard timeout is possible inside one Python process.
+    - Therefore we only do small, bounded factorint calls.
+    - For larger work we return None, so caller keeps n as composite cofactor.
+    """
+    del max_time_s  # no true hard timeout possible without subprocess
+
+    nofork_digit_cap = int(CFG("FACTORING.NOFORK_DIGIT_CAP", 80))
+    nofork_limit_cap = int(CFG("FACTORING.NOFORK_LIMIT_CAP", 10000))
+
+    if dec_digits(n) > nofork_digit_cap:
+        return None
+
+    safe_limit = min(limit or nofork_limit_cap, nofork_limit_cap)
+
+    return factorint(
+        n,
+        limit=safe_limit,
+        use_trial=True,
+        use_rho=True,
+        use_pm1=True,
+        use_ecm=bool(use_ecm),
+        verbose=False,
+    )
+
+
 def _factor(n: int, *, max_time_s: float | None = None) -> dict[int, int]:
     """
     Return the (possibly partial) factorization of ``n`` as a {prime: exponent} map.
@@ -467,32 +540,33 @@ def _factor(n: int, *, max_time_s: float | None = None) -> dict[int, int]:
       faster and avoids the overhead of subprocesses for the common cases.
 
     • **Big-n general path with a strict wall-clock budget**
-      For larger integers, we enforce a *true* time limit.  The total allowed
-      wall-clock time is:
+      For larger integers, we enforce a *true* time limit where supported.
 
           ``max_time_s``  (explicit parameter), or
           ``FACTORING.MAX_TIME_S`` from the profile (default: 2.0 seconds).
 
       A sequence of increasing ``limit`` values (``FACTORING.STEP_LIMITS``)
-      is tried, but **every attempt uses the bounded subprocess wrapper
-      ``_factorint_bounded``**, never plain ``factorint``.  Each subprocess
-      gets a ``max_time_s`` equal to the remaining budget.  When the time is
-      exhausted, the remaining composite is returned as a single unfactored
-      cofactor.
+      is tried. The helper ``_factorint_bounded`` selects the appropriate
+      backend:
 
-      This guarantees that the total time spent by `_factor` will not exceed
-      the configured budget, even for extremely hard inputs such as
-      ``2**10000 - 1``.
+          - Desktop Python: subprocess-based hard timeout.
+          - iOS/a-Shell: safe no-fork fallback.
+
+      When the time budget is exhausted, or the backend declines further
+      work, the remaining composite is returned as a single unfactored
+      cofactor.
 
     • **DIGIT_CAP / BITLEN_CAP safety gates**
       The early helper ``_too_big(n)`` applies:
-          - ``FACTORING.BITLEN_CAP`` (default: 10M bits), and
-      If either limit is exceeded, we immediately return ``{n: 1}`` without
-      attempting any factoring.
+          - ``FACTORING.BITLEN_CAP``
+          - optional digit limits
+
+      If either limit is exceeded, we immediately return ``{n: 1}``
+      without attempting any factoring.
 
     • **Composite-base detection**
       After collecting partial factors, any remaining composite cofactor
-      is included with exponent 1.  The caller (e.g. ``build_ctx``) can use
+      is included with exponent 1. The caller (e.g. ``build_ctx``) can use
       ``has_composite_base(fac)`` to detect incomplete factorization.
 
     • **Debug progress reporting**
@@ -517,7 +591,7 @@ def _factor(n: int, *, max_time_s: float | None = None) -> dict[int, int]:
     Returns
     -------
     dict[int, int]
-        A mapping ``{prime: exponent}``.  If factoring is incomplete
+        A mapping ``{prime: exponent}``. If factoring is incomplete
         (due to timeouts, size caps, or composite leftovers),
         the remaining cofactor appears as a single composite key.
 
@@ -530,8 +604,9 @@ def _factor(n: int, *, max_time_s: float | None = None) -> dict[int, int]:
     The function is safe for very large inputs:
     - Hard-factors are used when available,
     - Impossible-size numbers return ``{n: 1}`` immediately,
-    - Big numbers always use bounded subprocesses,
-    - The configured time budget is strictly respected.
+    - Desktop systems use hard timeouts,
+    - iOS uses a safe no-fork fallback,
+    - The configured time budget is respected whenever supported.
 
     Examples
     --------
@@ -539,7 +614,7 @@ def _factor(n: int, *, max_time_s: float | None = None) -> dict[int, int]:
     {2: 4, 3: 2, 5: 1, 7: 1}
 
     >>> _factor(2**10000 - 1)
-    {<huge_composite>: 1}    # returned quickly (caps/timeout)
+    {<huge_composite>: 1}
     """
     rt = _rt_current()
     debug = rt.debug
@@ -551,6 +626,7 @@ def _factor(n: int, *, max_time_s: float | None = None) -> dict[int, int]:
 
     # 2) Small/medium-n fast path: direct factorint, no time logic
     SMALL_DIGIT_THRESHOLD = CFG("FACTORING.SMALL_DIGIT_THRESHOLD", 80)
+
     if dec_digits(n) <= SMALL_DIGIT_THRESHOLD and not _too_big(n):
         return factorint(
             n,
@@ -561,12 +637,19 @@ def _factor(n: int, *, max_time_s: float | None = None) -> dict[int, int]:
             verbose=False,
         )
 
-    # 3) General big-n path — *always bounded*
+    # 3) General big-n path
     max_time = float(
-        max_time_s if max_time_s is not None else CFG("FACTORING.MAX_TIME_S", 2.0)
+        max_time_s if max_time_s is not None
+        else CFG("FACTORING.MAX_TIME_S", 2.0)
     )
+
     use_ecm = bool(CFG("FACTORING.USE_ECM", False))
-    step_limits = list(CFG("FACTORING.STEP_LIMITS", [1000, 10000, 100000, 1000000]))
+    step_limits = list(
+        CFG(
+            "FACTORING.STEP_LIMITS",
+            [1000, 10000, 100000, 1000000],
+        )
+    )
 
     t0 = perf_counter()
     last_report = 0.0
@@ -575,11 +658,12 @@ def _factor(n: int, *, max_time_s: float | None = None) -> dict[int, int]:
 
     # Early size cap check
     if _too_big(remaining):
-        acc[remaining] = acc.get(remaining, 0) + 1
-        return acc
+        return {remaining: 1}
 
     _INTERVAL = 0.5
+
     for lim in [*step_limits, None]:
+
         if remaining == 1:
             break
 
@@ -588,39 +672,61 @@ def _factor(n: int, *, max_time_s: float | None = None) -> dict[int, int]:
 
         if debug and elapsed - last_report >= _INTERVAL:
             bits = remaining.bit_length()
+
             print(
-                f"[factor] t={elapsed:5.2f}s left={max(time_left, 0):5.2f}s "
-                f"lim={lim!r} remaining≈{bits} bits",
+                f"[factor] t={elapsed:5.2f}s "
+                f"left={max(time_left, 0):5.2f}s "
+                f"lim={lim!r} "
+                f"remaining≈{bits} bits",
                 file=sys.stderr,
             )
+
             last_report = elapsed
 
+        # Global budget exhausted
         if time_left <= 0:
             acc[remaining] = acc.get(remaining, 0) + 1
+            remaining = 1
             break
 
+        # Safety caps
         if _too_big(remaining):
             acc[remaining] = acc.get(remaining, 0) + 1
+            remaining = 1
             break
 
-        # Hard limit for big numbers: always use bounded variant
         try:
             part = _factorint_bounded(
                 remaining,
                 limit=lim,
                 use_ecm=use_ecm,
-                max_time_s=max(time_left, 0.05),  # tiny positive safeguard
+                max_time_s=max(time_left, 0.05),
             )
+
+            # Timeout / no-fork refusal
             if part is None:
                 acc[remaining] = acc.get(remaining, 0) + 1
+                remaining = 1
                 break
+
         except (OverflowError, ValueError):
             acc[remaining] = acc.get(remaining, 0) + 1
+            remaining = 1
             break
 
-        _merge_fac(acc, {p: e for p, e in part.items() if p > 1 and isprime(p)})
+        # Keep only proven primes
+        _merge_fac(
+            acc,
+            {
+                p: e
+                for p, e in part.items()
+                if p > 1 and isprime(p)
+            },
+        )
+
         remaining = _cofactor_from_map(n, acc)
 
+    # Final composite remainder
     if remaining > 1:
         acc[remaining] = acc.get(remaining, 0) + 1
 

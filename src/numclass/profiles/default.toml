@@ -41,6 +41,8 @@ MAX_TIME_S                      = 5.0
 SMALL_DIGIT_THRESHOLD           = 80
 STEP_LIMITS                     = [1000, 10_000, 100_000, 1_000_000]
 USE_ECM                         = true
+NOFORK_DIGIT_CAP                = 120
+NOFORK_LIMIT_CAP                = 10000
 
 [DISPLAY_SETTINGS]
 DIVISOR_PRINT_LIMIT             = 100
@@ -150,7 +152,6 @@ MAX_K                  = 200_000
 
 [CLASSIFIER.POWER_FAMILY]
 MAX_EXP                = 2000
-TRY_COVERING_SET       = true
 COVER_PRIME_LIMIT      = 500
 COVER_MODULUS_CAP      = 5000
 COVER_TIME_BUDGET_S    = 1

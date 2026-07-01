@@ -1,5 +1,5 @@
 # Last 10,000 decimal digits of Graham's number
-# Generated with tools/generate_graham_last_digits_fast.py
+# Generated with tools/generate_graham_last_digits_fast.py, M.M.W. van Dinteren June 2026
 # SHA-256: 930f27ca0d3fdc3bbd8f7fa1ade89da1b45f2568147d799771d83ac2e8cf6f96
 
 3078726077030301309631860565499591166728394144521822940211684925744690830316086262130785618226100420

@@ -40,6 +40,8 @@ MAX_TIME_S                      = 5.0
 SMALL_DIGIT_THRESHOLD           = 80
 STEP_LIMITS                     = [1000, 10_000, 100_000, 1_000_000]
 USE_ECM                         = true
+NOFORK_DIGIT_CAP                = 120
+NOFORK_LIMIT_CAP                = 10000
 
 [DISPLAY_SETTINGS]
 DIVISOR_PRINT_LIMIT             = 250
@@ -59,7 +61,6 @@ SHOW_QUASI_ALIQUOT_SEQUENCE     = true
 SHOW_REPEATING_DEC_COUNT        = true
 SHOW_SKIPPED                    = true
 SHOW_UNITARY_ALIQUOT_SEQUENCE   = true
-SHOW_ZECKENDORF                 = true
 SHOW_ZECKENDORF_BITS            = true
 ZECKENDORF_MAX_TERMS            = 20  # 0 = unlimited
 ZECKENDORF_TRUNC_PREVIEW        = true
@@ -200,6 +201,12 @@ SHOW_COUNT             = true
 [CLASSIFIER.MOTZKIN]
 # from is_motzkin_number in combinatorial_geometric.py
 MAX_K                  = 200_000
+
+[CLASSIFIER.POWER_FAMILY]
+MAX_EXP                = 2000
+COVER_PRIME_LIMIT      = 500
+COVER_MODULUS_CAP      = 5000
+COVER_TIME_BUDGET_S    = 1
 
 [CLASSIFIER.PRIMORIAL]
 MAX_DIGITS             = 200
